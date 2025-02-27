@@ -89,6 +89,11 @@ public class AstPrinter implements Visitor<String> {
         }
         builder.append("\n");
         indentLevel++;
+
+        for (Stmt.VarDeclaration variable : stmt.variables) {
+            builder.append(indent()).append(variable.accept(this)).append("\n");
+        }
+
         for (Stmt.Function method : stmt.methods) {
             builder.append(indent()).append(method.accept(this)).append("\n");
         }
