@@ -466,6 +466,8 @@ public class Parser {
                 case WHILE:
                 case PRINT:
                 case RETURN:
+                case CONNECT:
+                case DISCONNECT:
                     return;
             }
 
