@@ -81,7 +81,7 @@ public class Scanner {
                 else if (isAlpha(c))
                     identifier();
                 else
-                    GSD.error(line, "Caracter desconocido.");
+                    GSD.error(line, "Carácter desconocido '" + c + "'.");
             }
         }
     }
