@@ -31,7 +31,7 @@ public class Parser {
     private Stmt declaration() {
         try {
             if (match(TokenType.CLASS)) return classDecl();
-            if (match(TokenType.FUNC)) return function("function");
+            if (match(TokenType.FUNC)) return function("función");
             if (match(TokenType.VAR)) return varDecl();
 
             return statement();
@@ -42,15 +42,15 @@ public class Parser {
     }
 
     private Stmt.Class classDecl() {
-        Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la clase.");
 
         Expr.Variable superclass = null;
         if (match(TokenType.LESS)) {
-            consume(TokenType.IDENTIFIER, "Expect superclass name.");
+            consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la superclase.");
             superclass = new Expr.Variable(previous());
         }
 
-        consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+        consume(TokenType.LEFT_BRACE, "Se esperaba '{' antes del cuerpo de la clase.");
 
         List<Stmt.VarDeclaration> variables = new ArrayList<>();
         List<Stmt.Function> methods = new ArrayList<>();
@@ -60,32 +60,32 @@ public class Parser {
             if (match(TokenType.VAR)) {
                 variables.add(varDecl());
             } else if (match(TokenType.FUNC)) {
-                methods.add(function("method"));
+                methods.add(function("método"));
             } else {
-                throw error(peek(), "Expected var or method declaration.");
+                throw error(peek(), "Se esperaba la declaración de un método o variable.");
             }
         }
 
-        consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+        consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del cuerpo de la clase.");
 
         return new Stmt.Class(name, superclass, variables, methods);
     }
 
     private Stmt.Function function(String kind) {
-        Token name = consume(TokenType.IDENTIFIER, "Expect " + kind + "name.");
+        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de " + kind + ".");
 
-        consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        consume(TokenType.LEFT_PAREN, "Se esperaba '(' después del nombre de  " + kind + ".");
 
         List<Token> parameters = new ArrayList<>();
         if (!check(TokenType.RIGHT_PAREN)) {
             do {
-                parameters.add(consume(TokenType.IDENTIFIER, "Expect parameter name."));
+                parameters.add(consume(TokenType.IDENTIFIER, "Se esperaba el nombre de parámetro"));
             } while (match(TokenType.COMMA));
         }
 
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los parámetros.");
 
-        consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + "body");
+        consume(TokenType.LEFT_BRACE, "Se esperaba '{' antes del cuerpo de  " + kind + ".");
 
         Stmt.Block body = block();
 
@@ -99,20 +99,20 @@ public class Parser {
             statements.add(declaration());
         }
 
-        consume(TokenType.RIGHT_BRACE, "Expect '}' after block");
+        consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del contenido del bloque");
 
         return new Stmt.Block(statements);
     }
 
     private Stmt.VarDeclaration varDecl() {
-        Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la variable.");
 
         Expr initializer = null;
         if (match(TokenType.EQUAL)) {
             initializer = expression();
         }
 
-        consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+        consume(TokenType.SEMICOLON, "Se esperaba ';' después de la declaración de la variable.");
 
         return new Stmt.VarDeclaration(name, initializer);
     }
@@ -135,7 +135,7 @@ public class Parser {
                 return new Expr.Set(get.object, get.name, value);
             }
 
-            error(equals, "Invalid assignment target.");
+            error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
         }
 
         return expr;
@@ -230,7 +230,7 @@ public class Parser {
             if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
             } else if (match(TokenType.DOT)) {
-                Token name = consume(TokenType.IDENTIFIER, "Expect property name after '.'.");
+                Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre del atributo después de '.'.");
                 expr = new Expr.Get(expr, name);
             } else {
                 break;
@@ -249,7 +249,7 @@ public class Parser {
             } while (match(TokenType.COMMA));
         }
 
-        Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+        Token paren = consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los argumentos.");
 
         return new Expr.Call(callee, paren, arguments);
     }
@@ -262,8 +262,8 @@ public class Parser {
 
         if (match(TokenType.SUPER)) {
             Token keyword = previous();
-            consume(TokenType.DOT, "Expect '.' after 'super'.");
-            Token method = consume(TokenType.IDENTIFIER, "Expect superclass method name");
+            consume(TokenType.DOT, "Se esperaba '.' después de 'super'.");
+            Token method = consume(TokenType.IDENTIFIER, "Se esperaba el nombre del método de la superclase");
             return new Expr.Super(keyword, method);
         }
 
@@ -280,11 +280,11 @@ public class Parser {
         // Ejemplo: (1 + 2) * 3
         if (match(TokenType.LEFT_PAREN)) {
             Expr expr = expression();
-            consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.");
+            consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de la expresión.");
             return new Expr.Group(expr);
         }
 
-        throw error(peek(), "Expect expression.");
+        throw error(peek(), "Se esperaba una expresión.");
     }
 
 
@@ -302,7 +302,7 @@ public class Parser {
     }
 
     private Stmt forStmt() {
-        consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+        consume(TokenType.LEFT_PAREN, "Se esperaba '(' después de 'for'.");
 
         Stmt initializer;
         if (match(TokenType.SEMICOLON)) {
@@ -317,13 +317,13 @@ public class Parser {
         if (!check(TokenType.SEMICOLON)) {
             condition = expression();
         }
-        consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+        consume(TokenType.SEMICOLON, "Se esperaba ';' después de la condición del ciclo.");
 
         Expr increment = null;
         if (!check(TokenType.RIGHT_PAREN)) {
             increment = expression();
         }
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses");
+        consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después del incremento");
 
         Stmt body = statement();
 
@@ -345,9 +345,9 @@ public class Parser {
     }
 
     private Stmt ifStmt() {
-        consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+        consume(TokenType.LEFT_PAREN, "Se esperaba '(' después de 'if'.");
         Expr condition = expression();
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+        consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de la condición.");
         Stmt thenBranch = statement();
 
         Stmt elseBranch = null;
@@ -359,9 +359,9 @@ public class Parser {
     }
 
     private Stmt whileStmt() {
-        consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+        consume(TokenType.LEFT_PAREN, "Se esperaba '(' después de 'while'.");
         Expr condition = expression();
-        consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.");
+        consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de la condición.");
         Stmt body = statement();
 
         return new Stmt.While(condition, body);
@@ -369,7 +369,7 @@ public class Parser {
 
     private Stmt printSmt() {
         Expr value = expression();
-        consume(TokenType.SEMICOLON, "Expect ';' after value");
+        consume(TokenType.SEMICOLON, "Se esperaba ';' después del valor");
         return new Stmt.Print(value);
     }
 
@@ -379,7 +379,7 @@ public class Parser {
         if (!check(TokenType.SEMICOLON)) {
             value = expression();
         }
-        consume(TokenType.SEMICOLON, "Expect ';' after return value.");
+        consume(TokenType.SEMICOLON, "Se esperaba ';' después del retorno.");
         return new Stmt.Return(keyword, value);
     }
 
@@ -389,18 +389,18 @@ public class Parser {
         if (!check(TokenType.SEMICOLON)) {
             password = expression();
         }
-        consume(TokenType.SEMICOLON, "Expect ';'.");
+        consume(TokenType.SEMICOLON, "Se esperaba ';'.");
         return new Stmt.Connect(ssid, password);
     }
 
     private Stmt disconnectStmt() {
-        consume(TokenType.SEMICOLON, "Expect ';' after ssid");
+        consume(TokenType.SEMICOLON, "Se esperaba ';'.");
         return new Stmt.Disconnect();
     }
 
     private Stmt exprStmt() {
         Expr expr = expression();
-        consume(TokenType.SEMICOLON, "Expect ';' after expression.");
+        consume(TokenType.SEMICOLON, "Se esperaba ';' después de la expresión.");
         return new Stmt.Expression(expr);
     }
 
