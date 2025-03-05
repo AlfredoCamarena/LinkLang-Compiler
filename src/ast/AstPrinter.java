@@ -8,12 +8,12 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visit(Expr.Assignment expr) {
-        return parenthesize("= " + expr.name.lexeme, expr.value);
+        return parenthesize("= " + expr.name.lexeme(), expr.value);
     }
 
     @Override
     public String visit(Expr.Binary expr) {
-        return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+        return parenthesize(expr.operator.lexeme(), expr.left, expr.right);
     }
 
     @Override
@@ -23,7 +23,7 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visit(Expr.Get expr) {
-        return parenthesize("." + expr.name.lexeme, expr.object);
+        return parenthesize("." + expr.name.lexeme(), expr.object);
     }
 
     @Override
@@ -39,17 +39,17 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visit(Expr.Logical expr) {
-        return parenthesize(expr.operator.lexeme, expr.left, expr.right);
+        return parenthesize(expr.operator.lexeme(), expr.left, expr.right);
     }
 
     @Override
     public String visit(Expr.Set expr) {
-        return parenthesize("= " + expr.name.lexeme, expr.object, expr.value);
+        return parenthesize("= " + expr.name.lexeme(), expr.object, expr.value);
     }
 
     @Override
     public String visit(Expr.Super expr) {
-        return "super." + expr.method.lexeme;
+        return "super." + expr.method.lexeme();
     }
 
     @Override
@@ -59,12 +59,12 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visit(Expr.Unary expr) {
-        return parenthesize(expr.operator.lexeme, expr.right);
+        return parenthesize(expr.operator.lexeme(), expr.right);
     }
 
     @Override
     public String visit(Expr.Variable expr) {
-        return expr.name.lexeme;
+        return expr.name.lexeme();
     }
 
     @Override
@@ -83,9 +83,9 @@ public class AstPrinter implements Visitor<String> {
     @Override
     public String visit(Stmt.Class stmt) {
         StringBuilder builder = new StringBuilder();
-        builder.append("(class ").append(stmt.name.lexeme);
+        builder.append("(class ").append(stmt.name.lexeme());
         if (stmt.superclass != null) {
-            builder.append(" < ").append(stmt.superclass.name.lexeme);
+            builder.append(" < ").append(stmt.superclass.name.lexeme());
         }
         builder.append("\n");
         indentLevel++;
@@ -110,9 +110,9 @@ public class AstPrinter implements Visitor<String> {
     @Override
     public String visit(Stmt.Function stmt) {
         StringBuilder builder = new StringBuilder();
-        builder.append("(func ").append(stmt.name.lexeme).append(" (");
+        builder.append("(func ").append(stmt.name.lexeme()).append(" (");
         for (Token param : stmt.parameters) {
-            builder.append(param.lexeme).append(" ");
+            builder.append(param.lexeme()).append(" ");
         }
         builder.append(")\n");
         indentLevel++;
@@ -144,9 +144,9 @@ public class AstPrinter implements Visitor<String> {
     @Override
     public String visit(Stmt.VarDeclaration stmt) {
         if (stmt.initializer == null) {
-            return "(var " + stmt.name.lexeme + ")";
+            return "(var " + stmt.name.lexeme() + ")";
         }
-        return parenthesize("var " + stmt.name.lexeme, stmt.initializer);
+        return parenthesize("var " + stmt.name.lexeme(), stmt.initializer);
     }
 
     @Override

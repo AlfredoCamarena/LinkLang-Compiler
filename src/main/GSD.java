@@ -78,10 +78,10 @@ public class GSD {
     }
 
     public static void error(Token token, String msg) {
-        if (token.type == TokenType.EOF) {
-            report(token.line, " at end", msg);
+        if (token.type() == TokenType.EOF) {
+            report(token.line(), " at end", msg);
         } else {
-            report(token.line, " at '" + token.lexeme + "'", msg);
+            report(token.line(), " at '" + token.lexeme() + "'", msg);
         }
     }
 
