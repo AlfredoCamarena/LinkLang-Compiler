@@ -35,7 +35,7 @@ public class Parser {
             if (match(TokenType.VAR)) return varDecl();
 
             return statement();
-        } catch (ParseError error) {
+        } catch (RuntimeException error) {
             sync();
             return null;
         }
@@ -445,9 +445,9 @@ public class Parser {
         return tokens.get(current);
     }
 
-    private ParseError error(Token token, String msg) {
+    private RuntimeException error(Token token, String msg) {
         GSD.error(token, msg);
-        return new ParseError();
+        return new RuntimeException();
     }
 
     private void sync() {
@@ -474,8 +474,5 @@ public class Parser {
 
             advance();
         }
-    }
-
-    private static class ParseError extends RuntimeException {
     }
 }
