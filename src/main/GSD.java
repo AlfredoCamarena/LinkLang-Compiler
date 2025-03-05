@@ -53,6 +53,8 @@ public class GSD {
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
 
+        if (hadError) return;
+
         //printTokens(tokens);
         //printAst(statements);
     }
@@ -67,11 +69,7 @@ public class GSD {
         AstPrinter printer = new AstPrinter();
 
         for (Stmt statement : statements) {
-            if (statement == null) {
-                System.out.println("Error: No se pudo analizar una declaración.");
-            } else {
-                System.out.println(statement.accept(printer));
-            }
+            System.out.println(statement.accept(printer));
         }
     }
 
