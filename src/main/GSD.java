@@ -82,14 +82,14 @@ public class GSD {
 
     public static void error(Token token, String msg) {
         if (token.type() == TokenType.EOF) {
-            report(token.line(), " at end", msg);
+            report(token.line(), " al final.", msg);
         } else {
-            report(token.line(), " at '" + token.lexeme() + "'", msg);
+            report(token.line(), " en '" + token.lexeme() + "'", msg);
         }
     }
 
     private static void report(int line, String where, String msg) {
-        System.err.println("[line " + line + "] Error " + where + ": " + msg);
+        System.err.println("[linea " + line + "] Error " + where + ": " + msg);
         hadError = true;
     }
 }
