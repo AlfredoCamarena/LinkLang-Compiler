@@ -51,14 +51,4 @@ public class SymbolTable {
     public enum ScopeType {
         GLOBAL, LOCAL
     }
-
-    public record Symbol(Token token, TokenType type, Object value, ScopeType scopeType) {
-        @Override
-        public String toString() {
-            return token.lexeme() + ": " +
-                    "Type=" + type +
-                    ", Value=" + value +
-                    ", Scope=" + scopeType;
-        }
-    }
 }
