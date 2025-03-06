@@ -6,6 +6,7 @@ import parser.Parser;
 import scanner.Scanner;
 import scanner.Token;
 import scanner.TokenType;
+import semantic_analysis.SymbolTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,13 +51,15 @@ public class GSD {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        Parser parser = new Parser(tokens);
+        SymbolTable symbolTable = new SymbolTable();
+        Parser parser = new Parser(tokens, symbolTable);
         List<Stmt> statements = parser.parse();
 
         if (hadError) return;
 
         //printTokens(tokens);
         //printAst(statements);
+        System.out.println(symbolTable);
     }
 
     private static void printTokens(List<Token> tokens) {

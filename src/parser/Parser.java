@@ -5,6 +5,7 @@ import ast.Stmt;
 import main.GSD;
 import scanner.Token;
 import scanner.TokenType;
+import semantic_analysis.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +13,12 @@ import java.util.List;
 
 public class Parser {
     private final List<Token> tokens;
+    private final SymbolTable symbolTable;
     private int current = 0;
 
-    public Parser(List<Token> tokens) {
+    public Parser(List<Token> tokens, SymbolTable symbolTable) {
         this.tokens = tokens;
+        this.symbolTable = symbolTable;
     }
 
     public List<Stmt> parse() {
@@ -44,6 +47,8 @@ public class Parser {
     private Stmt.Class classDecl() {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la clase.");
 
+        symbolTable.enterScope();
+
         Expr.Variable superclass = null;
         if (match(TokenType.LESS)) {
             consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la superclase.");
@@ -68,18 +73,25 @@ public class Parser {
 
         consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del cuerpo de la clase.");
 
+        symbolTable.exitScope();
+        symbolTable.define(name, TokenType.CLASS, null);
+
         return new Stmt.Class(name, superclass, variables, methods);
     }
 
     private Stmt.Function function(String kind) {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de " + kind + ".");
 
+        symbolTable.enterScope();
+
         consume(TokenType.LEFT_PAREN, "Se esperaba '(' después del nombre de  " + kind + ".");
 
         List<Token> parameters = new ArrayList<>();
         if (!check(TokenType.RIGHT_PAREN)) {
             do {
-                parameters.add(consume(TokenType.IDENTIFIER, "Se esperaba el nombre de parámetro"));
+                Token param = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de parámetro");
+                parameters.add(param);
+                symbolTable.define(param, TokenType.VAR, null);
             } while (match(TokenType.COMMA));
         }
 
@@ -89,10 +101,15 @@ public class Parser {
 
         Stmt.Block body = block();
 
+        symbolTable.exitScope();
+        symbolTable.define(name, TokenType.FUNC, null);
+
         return new Stmt.Function(name, parameters, body);
     }
 
     private Stmt.Block block() {
+        symbolTable.enterScope();
+
         List<Stmt> statements = new ArrayList<>();
 
         while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
@@ -100,6 +117,8 @@ public class Parser {
         }
 
         consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del contenido del bloque");
+
+        symbolTable.exitScope();
 
         return new Stmt.Block(statements);
     }
@@ -113,6 +132,8 @@ public class Parser {
         }
 
         consume(TokenType.SEMICOLON, "Se esperaba ';' después de la declaración de la variable.");
+
+        symbolTable.define(name, TokenType.VAR, initializer);
 
         return new Stmt.VarDeclaration(name, initializer);
     }
