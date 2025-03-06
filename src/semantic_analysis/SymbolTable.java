@@ -21,7 +21,6 @@ public class SymbolTable {
     }
 
     public void exitScope() {
-        System.out.println(this); // TODO habilitar para demostración
         if (!scopes.isEmpty()) {
             scopes.pop();
         }
