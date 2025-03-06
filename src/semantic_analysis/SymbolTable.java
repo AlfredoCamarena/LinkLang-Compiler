@@ -1,6 +1,5 @@
 package semantic_analysis;
 
-import main.GSD;
 import scanner.Token;
 import scanner.TokenType;
 
@@ -30,10 +29,6 @@ public class SymbolTable {
         Map<String, Symbol> currentScope = scopes.peek();
 
         assert currentScope != null;
-        if (currentScope.containsKey(name.lexeme())) {
-            GSD.error(name.line(), "La variable '" + name.lexeme() + "' ya se encuentra definida");
-        }
-
         currentScope.put(name.lexeme(), new Symbol(name, type, value,
                 scopes.size() == 1 ? ScopeType.GLOBAL : ScopeType.LOCAL));
     }
