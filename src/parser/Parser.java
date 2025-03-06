@@ -475,9 +475,6 @@ public class Parser {
         advance();
 
         while (!isAtEnd()) {
-            if (previous().type == TokenType.SEMICOLON)
-                return;
-
             switch (peek().type()) {
                 case CLASS:
                 case FUNC:
