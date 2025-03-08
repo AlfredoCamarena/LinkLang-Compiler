@@ -1,5 +1,6 @@
 package semantic_analysis;
 
+import ast.Stmt;
 import scanner.Token;
 import scanner.TokenType;
 
@@ -25,11 +26,11 @@ public class SymbolTable {
         }
     }
 
-    public void define(Token name, TokenType type, Object value) {
+    public void define(Token name, TokenType type, Stmt statement) {
         Map<String, Symbol> currentScope = scopes.peek();
 
         assert currentScope != null;
-        currentScope.put(name.lexeme(), new Symbol(name, type, value,
+        currentScope.put(name.lexeme(), new Symbol(name, type, statement,
                 scopes.size() == 1 ? ScopeType.GLOBAL : ScopeType.LOCAL));
     }
 

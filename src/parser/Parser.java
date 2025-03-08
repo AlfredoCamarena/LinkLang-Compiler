@@ -76,9 +76,11 @@ public class Parser {
         consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del cuerpo de la clase.");
 
         symbolTable.exitScope();
-        symbolTable.define(name, TokenType.CLASS, null);
 
-        return new Stmt.Class(name, superclass, variables, methods);
+        Stmt.Class declaredClass = new Stmt.Class(name, superclass, variables, methods);
+        symbolTable.define(name, TokenType.CLASS, declaredClass);
+
+        return declaredClass;
     }
 
     private Stmt.Function function(String kind) {
@@ -95,7 +97,7 @@ public class Parser {
             do {
                 Token param = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de parámetro");
                 parameters.add(param);
-                symbolTable.define(param, TokenType.VAR, null);
+                symbolTable.define(param, TokenType.VAR, new Stmt.VarDeclaration(param, null));
             } while (match(TokenType.COMMA));
         }
 
@@ -106,9 +108,11 @@ public class Parser {
         Stmt.Block body = block();
 
         symbolTable.exitScope();
-        symbolTable.define(name, TokenType.FUNC, null);
 
-        return new Stmt.Function(name, parameters, body);
+        Stmt.Function declaredFunc = new Stmt.Function(name, parameters, body);
+        symbolTable.define(name, TokenType.FUNC, declaredFunc);
+
+        return declaredFunc;
     }
 
     private Stmt.Block block() {
@@ -139,9 +143,11 @@ public class Parser {
 
         consume(TokenType.SEMICOLON, "Se esperaba ';' después de la declaración de la variable.");
 
-        symbolTable.define(name, TokenType.VAR, initializer);
 
-        return new Stmt.VarDeclaration(name, initializer);
+        Stmt.VarDeclaration declaredVar = new Stmt.VarDeclaration(name, initializer);
+        symbolTable.define(name, TokenType.VAR, declaredVar);
+
+        return declaredVar;
     }
 
     private Expr expression() {
