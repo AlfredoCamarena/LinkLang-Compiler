@@ -33,6 +33,16 @@ public class SymbolTable {
                 scopes.size() == 1 ? ScopeType.GLOBAL : ScopeType.LOCAL));
     }
 
+    public Symbol lookup(Token name) {
+        for (Map<String, Symbol> scope : scopes) {
+            Symbol symbol = scope.get(name.lexeme());
+            if (symbol != null) {
+                return symbol;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -5,6 +5,7 @@ import ast.Stmt;
 import main.GSD;
 import scanner.Token;
 import scanner.TokenType;
+import semantic_analysis.Symbol;
 import semantic_analysis.SymbolTable;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class Parser {
     private Stmt.Class classDecl() {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la clase.");
 
+        checkDoubleDecl(name, "clase");
         symbolTable.enterScope();
 
         Expr.Variable superclass = null;
@@ -81,6 +83,8 @@ public class Parser {
 
     private Stmt.Function function(String kind) {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de " + kind + ".");
+
+        checkDoubleDecl(name, "función");
 
         symbolTable.enterScope();
 
@@ -125,6 +129,8 @@ public class Parser {
 
     private Stmt.VarDeclaration varDecl() {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la variable.");
+
+        checkDoubleDecl(name, "variable");
 
         Expr initializer = null;
         if (match(TokenType.EQUAL)) {
@@ -433,6 +439,13 @@ public class Parser {
             }
         }
         return false;
+    }
+
+    private void checkDoubleDecl(Token name, String entityType) {
+        Symbol existingSymbol = symbolTable.lookup(name);
+        if (existingSymbol != null) {
+            GSD.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
+        }
     }
 
     private boolean check(TokenType type) {
