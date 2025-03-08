@@ -82,9 +82,9 @@ public class GSD {
 
     public static void error(Token token, String msg) {
         if (token.type() == TokenType.EOF) {
-            report(token.line(), " al final.", msg);
+            report(token.line(), "al final.", msg);
         } else {
-            report(token.line(), " en '" + token.lexeme() + "'", msg);
+            report(token.line(), "en '" + token.lexeme() + "'", msg);
         }
     }
 
