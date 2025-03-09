@@ -11,6 +11,7 @@ import java.util.List;
 
 public class SemanticAnalyzer implements Visitor<Void> {
     private final SymbolTable symbolTable = new SymbolTable();
+    private boolean isInsideFunction = false;
 
     public SymbolTable analyze(List<Stmt> statements) {
         for (Stmt statement : statements) {
@@ -35,6 +36,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Binary expr) {
+        checkValidBinaryOperands(expr);
         expr.left.accept(this);
         expr.right.accept(this);
         return null;
@@ -86,6 +88,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Unary expr) {
+        checkValidUnaryOperand(expr);
         expr.right.accept(this);
         return null;
     }
@@ -123,11 +126,16 @@ public class SemanticAnalyzer implements Visitor<Void> {
         checkDoubleDecl(stmt.name, "función");
         symbolTable.enterScope();
 
+        boolean prevContext = isInsideFunction;
+        isInsideFunction = true;
+
         for (Token param : stmt.parameters) {
             symbolTable.define(param, TokenType.VAR, new Stmt.VarDeclaration(param, null));
         }
 
         stmt.body.accept(this);
+
+        isInsideFunction = prevContext;
 
         symbolTable.exitScope();
         symbolTable.define(stmt.name, TokenType.FUNC, stmt);
@@ -179,6 +187,10 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Stmt.Return stmt) {
+        if (!isInsideFunction) {
+            GSD.error(stmt.keyword, "La sentencia 'Return' solo pude usarse dentro de una función.");
+        }
+
         if (stmt.value != null) {
             stmt.value.accept(this);
         }
@@ -215,7 +227,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     private void checkDeclared(Token name) {
         Symbol symbol = symbolTable.lookup(name);
         if (symbol == null) {
-            GSD.error(name, "Asegurate de declarar '" + name.lexeme() + "'.");
+            GSD.error(name, "Asegurate de declarar '" + name.lexeme() + "' antes de usarla.");
         }
     }
 
@@ -230,4 +242,76 @@ public class SemanticAnalyzer implements Visitor<Void> {
         }
     }
 
+    private void checkValidUnaryOperand(Expr.Unary expr) {
+        TokenType operandType = getType(expr.right);
+
+        if (operandType == null) {
+            return;
+        }
+
+        switch (expr.operator.type()) {
+            case MINUS:
+                if (operandType != TokenType.NUMBER) {
+                    GSD.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números");
+                }
+                break;
+
+            case BANG:
+                if (operandType != TokenType.TRUE && operandType != TokenType.FALSE) {
+                    GSD.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con booleanos");
+                }
+                break;
+        }
+    }
+
+    private void checkValidBinaryOperands(Expr.Binary expr) {
+        TokenType leftType = getType(expr.left);
+        TokenType rightType = getType(expr.right);
+
+        if (leftType == null || rightType == null) {
+            return;
+        }
+
+        switch (expr.operator.type()) {
+            case PLUS:
+                if ((leftType == TokenType.STRING && rightType == TokenType.STRING) ||
+                        (leftType == TokenType.NUMBER && rightType == TokenType.NUMBER)) {
+                    return;
+                }
+                GSD.error(expr.operator, "No puedes sumar una cadena con un número.");
+                break;
+
+            case STAR:
+            case MINUS:
+            case SLASH:
+                if (leftType == TokenType.NUMBER && rightType == TokenType.NUMBER) {
+                    return;
+                }
+                GSD.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números.");
+                break;
+        }
+    }
+
+    private TokenType getType(Expr expr) {
+        if (expr instanceof Expr.Literal) {
+            Object value = ((Expr.Literal) expr).value;
+            if (value instanceof Double) return TokenType.NUMBER;
+            if (value instanceof Boolean) return (boolean) value ? TokenType.TRUE : TokenType.FALSE;
+            if (value instanceof String) return TokenType.STRING;
+        } else if (expr instanceof Expr.Variable) {
+            Symbol symbol = symbolTable.lookup(((Expr.Variable) expr).name);
+            if (symbol != null) {
+                if (symbol.type() == TokenType.VAR) {
+                    Stmt.VarDeclaration variable = (Stmt.VarDeclaration) symbol.statement();
+                    if (variable.initializer != null) {
+                        return getType(variable.initializer);
+                    } else {
+                        GSD.error(symbol.token(), "La variable '" + symbol.token().lexeme() + "' no fue inicializada");
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }
