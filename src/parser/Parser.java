@@ -5,8 +5,6 @@ import ast.Stmt;
 import main.GSD;
 import scanner.Token;
 import scanner.TokenType;
-import semantic_analysis.Symbol;
-import semantic_analysis.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,12 +12,10 @@ import java.util.List;
 
 public class Parser {
     private final List<Token> tokens;
-    private final SymbolTable symbolTable;
     private int current = 0;
 
-    public Parser(List<Token> tokens, SymbolTable symbolTable) {
+    public Parser(List<Token> tokens) {
         this.tokens = tokens;
-        this.symbolTable = symbolTable;
     }
 
     public List<Stmt> parse() {
@@ -48,9 +44,6 @@ public class Parser {
     private Stmt.Class classDecl() {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la clase.");
 
-        checkDoubleDecl(name, "clase");
-        symbolTable.enterScope();
-
         Expr.Variable superclass = null;
         if (match(TokenType.LESS)) {
             consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la superclase.");
@@ -75,20 +68,11 @@ public class Parser {
 
         consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del cuerpo de la clase.");
 
-        symbolTable.exitScope();
-
-        Stmt.Class declaredClass = new Stmt.Class(name, superclass, variables, methods);
-        symbolTable.define(name, TokenType.CLASS, declaredClass);
-
-        return declaredClass;
+        return new Stmt.Class(name, superclass, variables, methods);
     }
 
     private Stmt.Function function(String kind) {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de " + kind + ".");
-
-        checkDoubleDecl(name, "función");
-
-        symbolTable.enterScope();
 
         consume(TokenType.LEFT_PAREN, "Se esperaba '(' después del nombre de  " + kind + ".");
 
@@ -97,7 +81,6 @@ public class Parser {
             do {
                 Token param = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de parámetro");
                 parameters.add(param);
-                symbolTable.define(param, TokenType.VAR, new Stmt.VarDeclaration(param, null));
             } while (match(TokenType.COMMA));
         }
 
@@ -107,16 +90,10 @@ public class Parser {
 
         Stmt.Block body = block();
 
-        symbolTable.exitScope();
-
-        Stmt.Function declaredFunc = new Stmt.Function(name, parameters, body);
-        symbolTable.define(name, TokenType.FUNC, declaredFunc);
-
-        return declaredFunc;
+        return new Stmt.Function(name, parameters, body);
     }
 
     private Stmt.Block block() {
-        symbolTable.enterScope();
 
         List<Stmt> statements = new ArrayList<>();
 
@@ -126,7 +103,6 @@ public class Parser {
 
         consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del contenido del bloque");
 
-        symbolTable.exitScope();
 
         return new Stmt.Block(statements);
     }
@@ -134,7 +110,6 @@ public class Parser {
     private Stmt.VarDeclaration varDecl() {
         Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la variable.");
 
-        checkDoubleDecl(name, "variable");
 
         Expr initializer = null;
         if (match(TokenType.EQUAL)) {
@@ -143,11 +118,7 @@ public class Parser {
 
         consume(TokenType.SEMICOLON, "Se esperaba ';' después de la declaración de la variable.");
 
-
-        Stmt.VarDeclaration declaredVar = new Stmt.VarDeclaration(name, initializer);
-        symbolTable.define(name, TokenType.VAR, declaredVar);
-
-        return declaredVar;
+        return new Stmt.VarDeclaration(name, initializer);
     }
 
     private Expr expression() {
@@ -306,7 +277,8 @@ public class Parser {
         }
 
         if (match(TokenType.IDENTIFIER)) {
-            return new Expr.Variable(previous());
+            Token name = previous();
+            return new Expr.Variable(name);
         }
 
 
@@ -445,13 +417,6 @@ public class Parser {
             }
         }
         return false;
-    }
-
-    private void checkDoubleDecl(Token name, String entityType) {
-        Symbol existingSymbol = symbolTable.lookup(name);
-        if (existingSymbol != null) {
-            GSD.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
-        }
     }
 
     private boolean check(TokenType type) {

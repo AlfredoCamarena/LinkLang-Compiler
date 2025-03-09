@@ -6,6 +6,7 @@ import parser.Parser;
 import scanner.Scanner;
 import scanner.Token;
 import scanner.TokenType;
+import semantic_analysis.SemanticAnalyzer;
 import semantic_analysis.SymbolTable;
 
 import java.io.BufferedReader;
@@ -51,9 +52,13 @@ public class GSD {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
-        SymbolTable symbolTable = new SymbolTable();
-        Parser parser = new Parser(tokens, symbolTable);
+        Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
+
+        if (hadError) return;
+
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+        SymbolTable symbolTable = semanticAnalyzer.analyze(statements);
 
         if (hadError) return;
 
