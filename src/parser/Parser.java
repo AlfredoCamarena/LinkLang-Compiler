@@ -139,7 +139,7 @@ public class Parser {
                 return new Expr.Set(get.object, get.name, value);
             }
 
-            error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
+            GSD.error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
         }
 
         return expr;
