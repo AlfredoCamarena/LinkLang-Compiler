@@ -101,7 +101,10 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Stmt.Class stmt) {
-        checkDoubleDecl(stmt.name, "clase");
+        if (checkDoubleDecl(stmt.name, "clase")) {
+            return null;
+        }
+        
         symbolTable.enterScope();
 
         if (stmt.superclass != null) {
@@ -123,7 +126,10 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Stmt.Function stmt) {
-        checkDoubleDecl(stmt.name, "función");
+        if (checkDoubleDecl(stmt.name, "función")) {
+            return null;
+        }
+
         symbolTable.enterScope();
 
         boolean prevContext = isInsideFunction;
@@ -154,7 +160,10 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Stmt.VarDeclaration stmt) {
-        checkDoubleDecl(stmt.name, "variable");
+        if (checkDoubleDecl(stmt.name, "variable")) {
+            return null;
+        }
+
         if (stmt.initializer != null) {
             stmt.initializer.accept(this);
         }
@@ -217,11 +226,13 @@ public class SemanticAnalyzer implements Visitor<Void> {
         return null;
     }
 
-    private void checkDoubleDecl(Token name, String entityType) {
+    private Boolean checkDoubleDecl(Token name, String entityType) {
         Symbol existingSymbol = symbolTable.lookup(name);
         if (existingSymbol != null) {
             GSD.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
+            return true;
         }
+        return false;
     }
 
     private void checkDeclared(Token name) {
