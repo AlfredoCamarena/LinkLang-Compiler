@@ -6,25 +6,6 @@ import java.util.List;
 
 public abstract class Stmt extends Node {
 
-    public static class Class extends Stmt {
-        public final Token name;
-        public final Expr.Variable superclass;
-        public final List<Stmt.VarDeclaration> variables;
-        public final List<Stmt.Function> methods;
-
-        public Class(Token name, Expr.Variable superclass, List<Stmt.VarDeclaration> variables, List<Function> methods) {
-            this.name = name;
-            this.superclass = superclass;
-            this.variables = variables;
-            this.methods = methods;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
     public static class Function extends Stmt {
         public final Token name;
         public final List<Token> parameters;

@@ -73,40 +73,6 @@ public abstract class Expr extends Node {
         }
     }
 
-    // Ejemplo: objeto.propiedad
-    public static class Get extends Expr {
-        public final Expr object;
-        public final Token name;
-
-        public Get(Expr object, Token name) {
-            this.object = object;
-            this.name = name;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
-    // Ejemplo: objeto.propiedad = valor
-    public static class Set extends Expr {
-        public final Expr object;
-        public final Token name;
-        public final Expr value;
-
-        public Set(Expr object, Token name, Expr value) {
-            this.object = object;
-            this.name = name;
-            this.value = value;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
     // Ejemplo: (1 + 2) * 3
     public static class Group extends Expr {
         public final Expr expression;
@@ -126,34 +92,6 @@ public abstract class Expr extends Node {
 
         public Literal(Object value) {
             this.value = value;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
-    public static class Super extends Expr {
-        public final Token keyword;
-        public final Token method;
-
-        public Super(Token keyword, Token method) {
-            this.keyword = keyword;
-            this.method = method;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
-    public static class This extends Expr {
-        public final Token keyword;
-
-        public This(Token keyword) {
-            this.keyword = keyword;
         }
 
         @Override

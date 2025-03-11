@@ -22,11 +22,6 @@ public class AstPrinter implements Visitor<String> {
     }
 
     @Override
-    public String visit(Expr.Get expr) {
-        return parenthesize("." + expr.name.lexeme(), expr.object);
-    }
-
-    @Override
     public String visit(Expr.Group expr) {
         return parenthesize("group", expr.expression);
     }
@@ -40,21 +35,6 @@ public class AstPrinter implements Visitor<String> {
     @Override
     public String visit(Expr.Logical expr) {
         return parenthesize(expr.operator.lexeme(), expr.left, expr.right);
-    }
-
-    @Override
-    public String visit(Expr.Set expr) {
-        return parenthesize("= " + expr.name.lexeme(), expr.object, expr.value);
-    }
-
-    @Override
-    public String visit(Expr.Super expr) {
-        return "super." + expr.method.lexeme();
-    }
-
-    @Override
-    public String visit(Expr.This expr) {
-        return "this";
     }
 
     @Override
@@ -74,28 +54,6 @@ public class AstPrinter implements Visitor<String> {
         indentLevel++;
         for (Stmt statement : stmt.statements) {
             builder.append(indent()).append(statement.accept(this)).append("\n");
-        }
-        indentLevel--;
-        builder.append(indent()).append(")");
-        return builder.toString();
-    }
-
-    @Override
-    public String visit(Stmt.Class stmt) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("(class ").append(stmt.name.lexeme());
-        if (stmt.superclass != null) {
-            builder.append(" < ").append(stmt.superclass.name.lexeme());
-        }
-        builder.append("\n");
-        indentLevel++;
-
-        for (Stmt.VarDeclaration variable : stmt.variables) {
-            builder.append(indent()).append(variable.accept(this)).append("\n");
-        }
-
-        for (Stmt.Function method : stmt.methods) {
-            builder.append(indent()).append(method.accept(this)).append("\n");
         }
         indentLevel--;
         builder.append(indent()).append(")");

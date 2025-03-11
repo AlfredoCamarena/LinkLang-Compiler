@@ -24,9 +24,6 @@ public class Scanner {
         keywords.put("true", TokenType.TRUE);
         keywords.put("var", TokenType.VAR);
         keywords.put("while", TokenType.WHILE);
-        keywords.put("class", TokenType.CLASS);
-        keywords.put("super", TokenType.SUPER);
-        keywords.put("this", TokenType.THIS);
         // TODO: Buscar las palabras reservadas finales
         keywords.put("connect", TokenType.CONNECT);
         keywords.put("disconnect", TokenType.DISCONNECT);
@@ -64,7 +61,6 @@ public class Scanner {
             case '{' -> addToken(TokenType.LEFT_BRACE);
             case '}' -> addToken(TokenType.RIGHT_BRACE);
             case ',' -> addToken(TokenType.COMMA);
-            case '.' -> addToken(TokenType.DOT);
             case '-' -> addToken(TokenType.MINUS);
             case '+' -> addToken(TokenType.PLUS);
             case ';' -> addToken(TokenType.SEMICOLON);

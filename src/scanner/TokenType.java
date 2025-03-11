@@ -3,7 +3,7 @@ package scanner;
 public enum TokenType {
     // Single-character tokens.
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
-    COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
+    COMMA, MINUS, PLUS, SEMICOLON, SLASH, STAR,
 
     // One or two character tokens.
     BANG, BANG_EQUAL,
@@ -15,8 +15,8 @@ public enum TokenType {
     IDENTIFIER, STRING, NUMBER,
 
     // Keywords.
-    AND, CLASS, ELSE, FALSE, FUNC, FOR, IF, NULL, OR,
-    RETURN, TRUE, VAR, WHILE, PRINT, SUPER, THIS,
+    AND, ELSE, FALSE, FUNC, FOR, IF, NULL, OR,
+    RETURN, TRUE, VAR, WHILE, PRINT,
 
     // Network oriented keywords.
     CONNECT, DISCONNECT,

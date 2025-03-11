@@ -30,7 +30,6 @@ public class Parser {
 
     private Stmt declaration() {
         try {
-            if (match(TokenType.CLASS)) return classDecl();
             if (match(TokenType.FUNC)) return function("función");
             if (match(TokenType.VAR)) return varDecl();
 
@@ -39,36 +38,6 @@ public class Parser {
             sync();
             return null;
         }
-    }
-
-    private Stmt.Class classDecl() {
-        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la clase.");
-
-        Expr.Variable superclass = null;
-        if (match(TokenType.LESS)) {
-            consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la superclase.");
-            superclass = new Expr.Variable(previous());
-        }
-
-        consume(TokenType.LEFT_BRACE, "Se esperaba '{' antes del cuerpo de la clase.");
-
-        List<Stmt.VarDeclaration> variables = new ArrayList<>();
-        List<Stmt.Function> methods = new ArrayList<>();
-
-
-        while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
-            if (match(TokenType.VAR)) {
-                variables.add(varDecl());
-            } else if (match(TokenType.FUNC)) {
-                methods.add(function("método"));
-            } else {
-                throw error(peek(), "Se esperaba la declaración de un método o variable.");
-            }
-        }
-
-        consume(TokenType.RIGHT_BRACE, "Se esperaba '}' después del cuerpo de la clase.");
-
-        return new Stmt.Class(name, superclass, variables, methods);
     }
 
     private Stmt.Function function(String kind) {
@@ -135,8 +104,6 @@ public class Parser {
             if (expr instanceof Expr.Variable) {
                 Token name = ((Expr.Variable) expr).name;
                 return new Expr.Assignment(name, value);
-            } else if (expr instanceof Expr.Get get) {
-                return new Expr.Set(get.object, get.name, value);
             }
 
             GSD.error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
@@ -233,9 +200,6 @@ public class Parser {
         while (true) {
             if (match(TokenType.LEFT_PAREN)) {
                 expr = finishCall(expr);
-            } else if (match(TokenType.DOT)) {
-                Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre del atributo después de '.'.");
-                expr = new Expr.Get(expr, name);
             } else {
                 break;
             }
@@ -263,18 +227,6 @@ public class Parser {
         if (match(TokenType.FALSE)) return new Expr.Literal(false);
         if (match(TokenType.NULL)) return new Expr.Literal(null);
         if (match(TokenType.NUMBER, TokenType.STRING)) return new Expr.Literal(previous().literal());
-
-        if (match(TokenType.SUPER)) {
-            Token keyword = previous();
-            consume(TokenType.DOT, "Se esperaba '.' después de 'super'.");
-            Token method = consume(TokenType.IDENTIFIER, "Se esperaba el nombre del método de la superclase");
-            return new Expr.Super(keyword, method);
-        }
-
-        if (match(TokenType.THIS)) {
-            Token keyword = previous();
-            return new Expr.This(keyword);
-        }
 
         if (match(TokenType.IDENTIFIER)) {
             Token name = previous();
@@ -460,7 +412,6 @@ public class Parser {
 
         while (!isAtEnd()) {
             switch (peek().type()) {
-                case CLASS:
                 case FUNC:
                 case VAR:
                 case FOR:

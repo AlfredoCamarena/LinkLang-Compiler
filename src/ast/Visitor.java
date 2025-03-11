@@ -9,25 +9,15 @@ public interface Visitor<R> {
 
     R visit(Expr.Call expr);
 
-    R visit(Expr.Get expr);
-
-    R visit(Expr.Set expr);
-
     R visit(Expr.Group expr);
 
     R visit(Expr.Literal expr);
-
-    R visit(Expr.Super expr);
-
-    R visit(Expr.This expr);
 
     R visit(Expr.Unary expr);
 
     R visit(Expr.Variable expr);
 
     // statements
-
-    R visit(Stmt.Class stmt);
 
     R visit(Stmt.Function stmt);
 
