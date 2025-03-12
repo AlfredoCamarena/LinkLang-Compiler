@@ -22,8 +22,8 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Assignment expr) {
-        checkDeclared(expr.name);
         expr.value.accept(this);
+        checkDeclared(expr.name);
         return null;
     }
 
@@ -36,19 +36,19 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Binary expr) {
-        checkValidBinaryOperands(expr);
         expr.left.accept(this);
         expr.right.accept(this);
+        checkValidBinaryOperands(expr);
         return null;
     }
 
     @Override
     public Void visit(Expr.Call expr) {
         expr.callee.accept(this);
-        checkFuncArguments(expr.callee, expr.arguments);
         for (Expr argument : expr.arguments) {
             argument.accept(this);
         }
+        checkFuncArguments(expr.callee, expr.arguments);
         return null;
     }
 
@@ -65,8 +65,8 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Unary expr) {
-        checkValidUnaryOperand(expr);
         expr.right.accept(this);
+        checkValidUnaryOperand(expr);
         return null;
     }
 
