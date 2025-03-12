@@ -44,6 +44,11 @@ public class ScopeManager {
         return null;
     }
 
+    public Symbol lookupLocal(Token name) {
+        assert scopes.peek() != null;
+        return scopes.peek().get(name.lexeme());
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

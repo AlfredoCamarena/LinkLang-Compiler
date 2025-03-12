@@ -179,7 +179,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     private Boolean checkDoubleDecl(Token name, String entityType) {
-        Symbol existingSymbol = scopeManager.lookup(name);
+        Symbol existingSymbol = scopeManager.lookupLocal(name);
         if (existingSymbol != null) {
             GSD.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
             return true;
