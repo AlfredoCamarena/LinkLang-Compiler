@@ -1,168 +1,26 @@
-// Declaración de una clase para representar un dispositivo WiFi
-class WiFiDevice {
-    var name;
-    var ipAddress;
-    var isConnected;
+var x = y;
 
-    func WiFiDevice(name, ipAddress) {
-        this.name = name;
-        this.ipAddress = ipAddress;
-        this.isConnected = false;
-    }
-
-    func conectar() {
-        if (this.isConnected) {
-            print this.name + " is already connected.";
-        } else {
-            this.isConnected = true;
-            print this.name + " connected to network.";
-        }
-    }
-
-    func desconectar() {
-        if (this.isConnected) {
-            this.isConnected = false;
-            print this.name + " disconnected from network.";
-        } else {
-            print this.name + " is already disconnected.";
-        }
-    }
-
-    func status() {
-        print "Device: " + this.name;
-        print "IP Address: " + this.ipAddress;
-        print "Connected: " + this.isConnected;
-    }
+func sumar(a,b){
+    print a + b;
 }
 
-// Declaración de una clase para representar una red WiFi
-class WiFiNetwork {
-    var ssid;
-    var password;
-    var device1; // Dispositivo 1
-    var device2; // Dispositivo 2
-    var device3; // Dispositivo 3
+restar(2,3);
+sumar(1,2,3);
 
-    func WiFiNetwork(ssid, password) {
-        this.ssid = ssid;
-        this.password = password;
-        this.device1 = null;
-        this.device2 = null;
-        this.device3 = null;
-    }
+var a = "hola";
+var b = a + 1;
 
-    func addDevice(device) {
-        if (this.device1 == null) {
-            this.device1 = device;
-            print "Device " + device.name + " added to network " + this.ssid;
-        } else if (this.device2 == null) {
-            this.device2 = device;
-            print "Device " + device.name + " added to network " + this.ssid;
-        } else if (this.device3 == null) {
-            this.device3 = device;
-            print "Device " + device.name + " added to network " + this.ssid;
-        } else {
-            print "Network " + this.ssid + " is full. Cannot add more devices.";
-        }
-    }
+print 5 * "hola";
+print 5 / "hola";
 
-    func removeDevice(device) {
-        if (this.device1 == device) {
-            this.device1 = null;
-            print "Device " + device.name + " removed from network " + this.ssid;
-        } else if (this.device2 == device) {
-            this.device2 = null;
-            print "Device " + device.name + " removed from network " + this.ssid;
-        } else if (this.device3 == device) {
-            this.device3 = null;
-            print "Device " + device.name + " removed from network " + this.ssid;
-        } else {
-            print "Device " + device.name + " not found in network " + this.ssid;
-        }
-    }
+print -"5";
+print !"5";
 
-    func listDevices() {
-        print "Devices in network " + this.ssid + ":";
-        if (this.device1 != null) {
-            print "- " + this.device1.name;
-        }
-        if (this.device2 != null) {
-            print "- " + this.device2.name;
-        }
-        if (this.device3 != null) {
-            print "- " + this.device3.name;
-        }
-    }
-}
+func sumar(){}
 
-// Función principal para probar la administración de la red WiFi
-func main() {
-    // Crear una red WiFi
-    var myNetwork = WiFiNetwork("MyHomeNetwork", "securepassword123");
+var x;
 
-    // Crear algunos dispositivos WiFi
-    var laptop = WiFiDevice("Laptop", "192.168.1.2");
-    var phone = WiFiDevice("Phone", "192.168.1.3");
-    var smartTV = WiFiDevice("Smart TV", "192.168.1.4");
+return 5;
 
-    // Agregar dispositivos a la red
-    myNetwork.addDevice(laptop);
-    myNetwork.addDevice(phone);
-    myNetwork.addDevice(smartTV);
-
-    // Conectar dispositivos a la red
-    laptop.coectar();
-    phone.conectar();
-    smartTV.conectar();
-
-    // Listar dispositivos en la red
-    myNetwork.listDevices();
-
-    // Verificar el estado de los dispositivos
-    laptop.status();
-    phone.status();
-    smartTV.status();
-
-    // Desconectar un dispositivo
-    smartTV.desconectar();
-
-    // Verificar el estado nuevamente
-    smartTV.status();
-
-    // Eliminar un dispositivo de la red
-    myNetwork.removeDevice(phone);
-
-    // Listar dispositivos nuevamente
-    myNetwork.listDevices();
-
-    // Configurar una nueva red WiFi
-    var guestNetwork = WiFiNetwork("GuestNetwork", "guestpassword");
-    var tablet = WiFiDevice("Tablet", "192.168.1.5");
-
-    // Agregar y conectar un dispositivo a la nueva red
-    guestNetwork.addDevice(tablet);
-    tablet.conectar();
-
-    // Verificar el estado del dispositivo en la nueva red
-    tablet.status();
-
-    // Desconectar todos los dispositivos de la red principal
-    if (myNetwork.device1 != null) {
-        myNetwork.device1.desconectar();
-    }
-    if (myNetwork.device2 != null) {
-        myNetwork.device2.desconectar();
-    }
-    if (myNetwork.device3 != null) {
-        myNetwork.device3.desconectar();
-    }
-
-    // Listar dispositivos en la red principal después de desconectar
-    myNetwork.listDevices();
-
-    // Intentar conectar un dispositivo que ya está conectado
-    laptop.conectar();
-
-    // Intentar desconectar un dispositivo que ya está desconectado
-    smartTV.desconectar();
-}
+var f;
+var g = f + 1;
