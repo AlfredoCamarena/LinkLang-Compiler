@@ -148,7 +148,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Stmt.Return stmt) {
         if (!isInsideFunction) {
-            GSD.error(stmt.keyword, "La sentencia 'Return' solo pude usarse dentro de una función.");
+            GSD.error(stmt.keyword, "La sentencia 'return' solo pude usarse dentro de una función.");
         }
 
         if (stmt.value != null) {
