@@ -8,14 +8,9 @@ program:
     ;
 
 declaration:
-    classDecl
-    | funcDecl
+    funcDecl
     | varDecl
     | statement
-    ;
-
-classDecl:
-    'class' identifier ( '<' identifier )? '{' ( varDecl | function )* '}'
     ;
 
 funcDecl:
@@ -72,7 +67,7 @@ returnStmt:
 connectStmt:
     'connect' String (String)? ';'
     ;
-disconnect:
+disconnectStmt:
     'disconnect' ';'
     ;
 
@@ -85,7 +80,7 @@ expression:
     ;
 
 assignment:
-    ( call '.' )? identifier '=' assignment
+    identifier '=' assignment
                | logic_or
     ;
 
@@ -118,18 +113,15 @@ unary:
     ;
 
 call:
-    primary ( '(' arguments? ')' | '.' identifier )*
+    primary ( '(' arguments? ')')*
     ;
 
 primary:
     'true'
     | 'false'
     | 'null'
-    | 'this'
     | number
     | String
-    | 'super'
-    | 'this'
     ;
 
 parameters:
