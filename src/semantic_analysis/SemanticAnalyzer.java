@@ -10,14 +10,14 @@ import scanner.TokenType;
 import java.util.List;
 
 public class SemanticAnalyzer implements Visitor<Void> {
-    private final SymbolTable symbolTable = new SymbolTable();
+    private final ScopeManager scopeManager = new ScopeManager();
     private boolean isInsideFunction = false;
 
-    public SymbolTable analyze(List<Stmt> statements) {
+    public ScopeManager analyze(List<Stmt> statements) {
         for (Stmt statement : statements) {
             statement.accept(this);
         }
-        return symbolTable;
+        return scopeManager;
     }
 
     @Override
@@ -82,31 +82,31 @@ public class SemanticAnalyzer implements Visitor<Void> {
             return null;
         }
 
-        symbolTable.enterScope();
+        scopeManager.enterScope();
 
         boolean prevContext = isInsideFunction;
         isInsideFunction = true;
 
         for (Token param : stmt.parameters) {
-            symbolTable.define(param, TokenType.VAR, new Stmt.VarDeclaration(param, null));
+            scopeManager.define(param, TokenType.VAR, new Stmt.VarDeclaration(param, null));
         }
 
         stmt.body.accept(this);
 
         isInsideFunction = prevContext;
 
-        symbolTable.exitScope();
-        symbolTable.define(stmt.name, TokenType.FUNC, stmt);
+        scopeManager.exitScope();
+        scopeManager.define(stmt.name, TokenType.FUNC, stmt);
         return null;
     }
 
     @Override
     public Void visit(Stmt.Block stmt) {
-        symbolTable.enterScope();
+        scopeManager.enterScope();
         for (Stmt statement : stmt.statements) {
             statement.accept(this);
         }
-        symbolTable.exitScope();
+        scopeManager.exitScope();
         return null;
     }
 
@@ -119,7 +119,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         if (stmt.initializer != null) {
             stmt.initializer.accept(this);
         }
-        symbolTable.define(stmt.name, TokenType.VAR, stmt);
+        scopeManager.define(stmt.name, TokenType.VAR, stmt);
         return null;
     }
 
@@ -179,7 +179,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     private Boolean checkDoubleDecl(Token name, String entityType) {
-        Symbol existingSymbol = symbolTable.lookup(name);
+        Symbol existingSymbol = scopeManager.lookup(name);
         if (existingSymbol != null) {
             GSD.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
             return true;
@@ -188,7 +188,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     private void checkDeclared(Token name) {
-        Symbol symbol = symbolTable.lookup(name);
+        Symbol symbol = scopeManager.lookup(name);
         if (symbol == null) {
             GSD.error(name, "Asegurate de declarar '" + name.lexeme() + "' antes de usarla.");
         }
@@ -196,7 +196,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     private void checkFuncArguments(Expr callee, List<Expr> arguments) {
         Token name = ((Expr.Variable) callee).name;
-        Symbol symbol = symbolTable.lookup(name);
+        Symbol symbol = scopeManager.lookup(name);
         if (symbol != null && symbol.type() == TokenType.FUNC) {
             Stmt.Function function = (Stmt.Function) symbol.statement();
             if (arguments.size() != function.parameters.size()) {
@@ -262,7 +262,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
             if (value instanceof Boolean) return (boolean) value ? TokenType.TRUE : TokenType.FALSE;
             if (value instanceof String) return TokenType.STRING;
         } else if (expr instanceof Expr.Variable) {
-            Symbol symbol = symbolTable.lookup(((Expr.Variable) expr).name);
+            Symbol symbol = scopeManager.lookup(((Expr.Variable) expr).name);
             if (symbol != null) {
                 if (symbol.type() == TokenType.VAR) {
                     Stmt.VarDeclaration variable = (Stmt.VarDeclaration) symbol.statement();

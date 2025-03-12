@@ -9,10 +9,10 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SymbolTable {
+public class ScopeManager {
     private final Deque<Map<String, Symbol>> scopes = new ArrayDeque<>();
 
-    public SymbolTable() {
+    public ScopeManager() {
         enterScope(); // Ámbito global
     }
 

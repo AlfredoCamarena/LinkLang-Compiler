@@ -6,8 +6,8 @@ import parser.Parser;
 import scanner.Scanner;
 import scanner.Token;
 import scanner.TokenType;
+import semantic_analysis.ScopeManager;
 import semantic_analysis.SemanticAnalyzer;
-import semantic_analysis.SymbolTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,13 +58,13 @@ public class GSD {
         if (hadError) return;
 
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
-        SymbolTable symbolTable = semanticAnalyzer.analyze(statements);
+        ScopeManager scopeManager = semanticAnalyzer.analyze(statements);
 
         if (hadError) return;
 
         //printTokens(tokens);
         //printAst(statements);
-        System.out.println(symbolTable);
+        System.out.println(scopeManager);
     }
 
     private static void printTokens(List<Token> tokens) {
