@@ -53,19 +53,6 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     @Override
-    public Void visit(Expr.Get expr) {
-        expr.object.accept(this);
-        return null;
-    }
-
-    @Override
-    public Void visit(Expr.Set expr) {
-        expr.object.accept(this);
-        expr.value.accept(this);
-        return null;
-    }
-
-    @Override
     public Void visit(Expr.Group expr) {
         expr.expression.accept(this);
         return null;
@@ -73,16 +60,6 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Literal expr) {
-        return null;
-    }
-
-    @Override
-    public Void visit(Expr.Super expr) {
-        return null;
-    }
-
-    @Override
-    public Void visit(Expr.This expr) {
         return null;
     }
 
@@ -96,31 +73,6 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Expr.Variable expr) {
         checkDeclared(expr.name);
-        return null;
-    }
-
-    @Override
-    public Void visit(Stmt.Class stmt) {
-        if (checkDoubleDecl(stmt.name, "clase")) {
-            return null;
-        }
-        
-        symbolTable.enterScope();
-
-        if (stmt.superclass != null) {
-            stmt.superclass.accept(this);
-        }
-
-        for (Stmt.VarDeclaration varDecl : stmt.variables) {
-            varDecl.accept(this);
-        }
-
-        for (Stmt.Function method : stmt.methods) {
-            method.accept(this);
-        }
-
-        symbolTable.exitScope();
-        symbolTable.define(stmt.name, TokenType.CLASS, stmt);
         return null;
     }
 
