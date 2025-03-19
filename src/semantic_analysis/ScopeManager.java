@@ -2,7 +2,6 @@ package semantic_analysis;
 
 import ast.Stmt;
 import scanner.Token;
-import scanner.TokenType;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -26,7 +25,7 @@ public class ScopeManager {
         }
     }
 
-    public void define(Token name, TokenType type, Stmt statement) {
+    public void define(Token name, SymbolType type, Stmt statement) {
         Map<String, Symbol> currentScope = scopes.peek();
 
         assert currentScope != null;

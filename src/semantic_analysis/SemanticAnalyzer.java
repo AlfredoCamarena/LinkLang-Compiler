@@ -87,7 +87,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         isInsideFunction = true;
 
         for (Token param : stmt.parameters) {
-            scopeManager.define(param, TokenType.VAR, new Stmt.VarDeclaration(param, null));
+            scopeManager.define(param, SymbolType.PARAMETER, new Stmt.VarDeclaration(param, null));
         }
 
         stmt.body.accept(this);
@@ -95,7 +95,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         isInsideFunction = prevContext;
 
         scopeManager.exitScope();
-        scopeManager.define(stmt.name, TokenType.FUNC, stmt);
+        scopeManager.define(stmt.name, SymbolType.FUNCTION, stmt);
         return null;
     }
 
@@ -118,7 +118,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         if (stmt.initializer != null) {
             stmt.initializer.accept(this);
         }
-        scopeManager.define(stmt.name, TokenType.VAR, stmt);
+        scopeManager.define(stmt.name, SymbolType.VARIABLE, stmt);
         return null;
     }
 
@@ -196,7 +196,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     private void checkFuncArguments(Expr.Variable callee, List<Expr> arguments) {
         Token name = callee.name;
         Symbol symbol = scopeManager.lookup(name);
-        if (symbol != null && symbol.type() == TokenType.FUNC) {
+        if (symbol != null && symbol.type() == SymbolType.FUNCTION) {
             Stmt.Function function = (Stmt.Function) symbol.statement();
             if (arguments.size() != function.parameters.size()) {
                 GSD.error(name, "Número incorrecto de argumentos para la función '" + name.lexeme() + "'. Se esperaban " + function.parameters.size() + " argumentos.");
@@ -265,7 +265,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
                 return null;
             Symbol symbol = scopeManager.lookup(((Expr.Variable) expr).name);
             if (symbol != null) {
-                if (symbol.type() == TokenType.VAR) {
+                if (symbol.type() == SymbolType.VARIABLE) {
                     Stmt.VarDeclaration variable = (Stmt.VarDeclaration) symbol.statement();
                     if (variable.initializer != null) {
                         return getType(variable.initializer);
