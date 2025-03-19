@@ -17,12 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class GSD {
+public class LinkLang {
     private static boolean hadError = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1)
-            System.out.println("Uso: gsd [script]");
+            System.out.println("Uso: java ruta/LinkLang.java [ruta/codigo.lila] ");
         else if (args.length == 1)
             runFile(args[0]);
         else

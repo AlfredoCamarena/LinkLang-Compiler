@@ -2,7 +2,7 @@ package parser;
 
 import ast.Expr;
 import ast.Stmt;
-import main.GSD;
+import main.LinkLang;
 import scanner.Token;
 import scanner.TokenType;
 
@@ -106,7 +106,7 @@ public class Parser {
                 return new Expr.Assignment(name, value);
             }
 
-            GSD.error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
+            LinkLang.error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
         }
 
         return expr;
@@ -393,7 +393,7 @@ public class Parser {
     }
 
     private RuntimeException error(Token token, String msg) {
-        GSD.error(token, msg);
+        LinkLang.error(token, msg);
         return new RuntimeException();
     }
 

@@ -3,7 +3,7 @@ package semantic_analysis;
 import ast.Expr;
 import ast.Stmt;
 import ast.Visitor;
-import main.GSD;
+import main.LinkLang;
 import scanner.Token;
 import scanner.TokenType;
 
@@ -148,7 +148,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Stmt.Return stmt) {
         if (!isInsideFunction) {
-            GSD.error(stmt.keyword, "La sentencia 'return' solo pude usarse dentro de una función.");
+            LinkLang.error(stmt.keyword, "La sentencia 'return' solo pude usarse dentro de una función.");
         }
 
         if (stmt.value != null) {
@@ -180,7 +180,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     private Boolean checkDoubleDecl(Token name, String entityType) {
         Symbol existingSymbol = scopeManager.lookupLocal(name);
         if (existingSymbol != null) {
-            GSD.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
+            LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
             return true;
         }
         return false;
@@ -189,7 +189,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     private void checkDeclared(Token name) {
         Symbol symbol = scopeManager.lookup(name);
         if (symbol == null) {
-            GSD.error(name, "Asegurate de declarar '" + name.lexeme() + "' antes de usarla.");
+            LinkLang.error(name, "Asegurate de declarar '" + name.lexeme() + "' antes de usarla.");
         }
     }
 
@@ -199,7 +199,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         if (symbol != null && symbol.type() == SymbolType.FUNCTION) {
             Stmt.Function function = (Stmt.Function) symbol.statement();
             if (arguments.size() != function.parameters.size()) {
-                GSD.error(name, "Número incorrecto de argumentos para la función '" + name.lexeme() + "'. Se esperaban " + function.parameters.size() + " argumentos.");
+                LinkLang.error(name, "Número incorrecto de argumentos para la función '" + name.lexeme() + "'. Se esperaban " + function.parameters.size() + " argumentos.");
             }
         }
     }
@@ -214,13 +214,13 @@ public class SemanticAnalyzer implements Visitor<Void> {
         switch (expr.operator.type()) {
             case MINUS:
                 if (operandType != TokenType.NUMBER) {
-                    GSD.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números");
+                    LinkLang.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números");
                 }
                 break;
 
             case BANG:
                 if (operandType != TokenType.TRUE && operandType != TokenType.FALSE) {
-                    GSD.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con booleanos");
+                    LinkLang.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con booleanos");
                 }
                 break;
         }
@@ -240,7 +240,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
                         (leftType == TokenType.NUMBER && rightType == TokenType.NUMBER)) {
                     return;
                 }
-                GSD.error(expr.operator, "No puedes sumar una cadena con un número.");
+                LinkLang.error(expr.operator, "No puedes sumar una cadena con un número.");
                 break;
 
             case STAR:
@@ -249,7 +249,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
                 if (leftType == TokenType.NUMBER && rightType == TokenType.NUMBER) {
                     return;
                 }
-                GSD.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números.");
+                LinkLang.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números.");
                 break;
         }
     }
@@ -270,7 +270,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
                     if (variable.initializer != null) {
                         return getType(variable.initializer);
                     } else {
-                        GSD.error(symbol.token(), "La variable '" + symbol.token().lexeme() + "' no fue inicializada");
+                        LinkLang.error(symbol.token(), "La variable '" + symbol.token().lexeme() + "' no fue inicializada");
                         return null;
                     }
                 }

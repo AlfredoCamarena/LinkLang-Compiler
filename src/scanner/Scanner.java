@@ -1,6 +1,6 @@
 package scanner;
 
-import main.GSD;
+import main.LinkLang;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,7 +77,7 @@ public class Scanner {
                 else if (isAlpha(c))
                     identifier();
                 else
-                    GSD.error(line, "Carácter desconocido '" + c + "'.");
+                    LinkLang.error(line, "Carácter desconocido '" + c + "'.");
             }
         }
     }
@@ -97,7 +97,7 @@ public class Scanner {
         }
 
         if (isAtEnd()) {
-            GSD.error(line, "Cadena sin comillas finales");
+            LinkLang.error(line, "Cadena sin comillas finales");
             return;
         }
 
