@@ -57,11 +57,11 @@ public abstract class Expr extends Node {
     }
 
     public static class Call extends Expr {
-        public final Expr callee;
+        public final Expr.Variable callee;
         public final Token paren;
         public final List<Expr> arguments;
 
-        public Call(Expr callee, Token paren, List<Expr> arguments) {
+        public Call(Expr.Variable callee, Token paren, List<Expr> arguments) {
             this.callee = callee;
             this.paren = paren;
             this.arguments = arguments;

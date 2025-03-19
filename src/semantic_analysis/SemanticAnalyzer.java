@@ -193,8 +193,8 @@ public class SemanticAnalyzer implements Visitor<Void> {
         }
     }
 
-    private void checkFuncArguments(Expr callee, List<Expr> arguments) {
-        Token name = ((Expr.Variable) callee).name;
+    private void checkFuncArguments(Expr.Variable callee, List<Expr> arguments) {
+        Token name = callee.name;
         Symbol symbol = scopeManager.lookup(name);
         if (symbol != null && symbol.type() == TokenType.FUNC) {
             Stmt.Function function = (Stmt.Function) symbol.statement();

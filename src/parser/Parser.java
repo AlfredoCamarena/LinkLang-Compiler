@@ -191,35 +191,7 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return call();
-    }
-
-    private Expr call() {
-        Expr expr = primary();
-
-        while (true) {
-            if (match(TokenType.LEFT_PAREN)) {
-                expr = finishCall(expr);
-            } else {
-                break;
-            }
-        }
-
-        return expr;
-    }
-
-    private Expr finishCall(Expr callee) {
-        List<Expr> arguments = new ArrayList<>();
-
-        if (!check(TokenType.RIGHT_PAREN)) {
-            do {
-                arguments.add(expression());
-            } while (match(TokenType.COMMA));
-        }
-
-        Token paren = consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los argumentos.");
-
-        return new Expr.Call(callee, paren, arguments);
+        return primary();
     }
 
     private Expr primary() {
@@ -230,7 +202,11 @@ public class Parser {
 
         if (match(TokenType.IDENTIFIER)) {
             Token name = previous();
-            return new Expr.Variable(name);
+            Expr.Variable var = new Expr.Variable(name);
+            if (match(TokenType.LEFT_PAREN)) {
+                return finishCall(var);
+            }
+            return var;
         }
 
 
@@ -242,6 +218,20 @@ public class Parser {
         }
 
         throw error(peek(), "Se esperaba una expresión.");
+    }
+
+    private Expr finishCall(Expr.Variable callee) {
+        List<Expr> arguments = new ArrayList<>();
+
+        if (!check(TokenType.RIGHT_PAREN)) {
+            do {
+                arguments.add(expression());
+            } while (match(TokenType.COMMA));
+        }
+
+        Token paren = consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los argumentos.");
+
+        return new Expr.Call(callee, paren, arguments);
     }
 
 
