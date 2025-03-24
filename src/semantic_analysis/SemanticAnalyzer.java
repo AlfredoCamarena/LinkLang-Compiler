@@ -164,6 +164,24 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     @Override
+    public Void visit(Stmt.Input stmt) {
+        if (checkDoubleDecl(stmt.name, "variable")) {
+            return null;
+        }
+
+        if (stmt.prompt != null) {
+            stmt.prompt.accept(this);
+
+            if (getType(stmt.prompt) != TokenType.STRING) {
+                LinkLang.error(stmt.keyword, "Se esperaba un String para el mensaje del input");
+            }
+        }
+
+        scopeManager.define(stmt.name, SymbolType.VARIABLE, stmt);
+        return null;
+    }
+
+    @Override
     public Void visit(Stmt.Connect stmt) {
         stmt.ssid.accept(this);
         if (stmt.password != null) {

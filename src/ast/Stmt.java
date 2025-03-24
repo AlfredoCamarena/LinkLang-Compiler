@@ -124,6 +124,23 @@ public abstract class Stmt extends Node {
         }
     }
 
+    public static class Input extends Stmt {
+        public final Token keyword;
+        public final Token name;
+        public final Expr prompt;
+
+        public Input(Token keyword, Token name, Expr prompt) {
+            this.keyword = keyword;
+            this.name = name;
+            this.prompt = prompt;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visit(this);
+        }
+    }
+
     // TODO Agregar clases para sentencias propias
 
     public static class Connect extends Stmt {

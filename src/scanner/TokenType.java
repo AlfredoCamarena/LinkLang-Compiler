@@ -16,7 +16,7 @@ public enum TokenType {
 
     // Keywords.
     AND, ELSE, FALSE, FUNC, FOR, IF, NULL, OR,
-    RETURN, TRUE, VAR, WHILE, PRINT,
+    RETURN, TRUE, VAR, WHILE, PRINT, INPUT,
 
     // Network oriented keywords.
     CONNECT, DISCONNECT,

@@ -241,6 +241,7 @@ public class Parser {
         if (match(TokenType.WHILE)) return whileStmt();
         if (match(TokenType.LEFT_BRACE)) return block();
         if (match(TokenType.PRINT)) return printSmt();
+        if (match(TokenType.INPUT)) return inputStmt();
         if (match(TokenType.RETURN)) return returnStmt();
         if (match(TokenType.CONNECT)) return connectStmt();
         if (match(TokenType.DISCONNECT)) return disconnectStmt();
@@ -318,6 +319,20 @@ public class Parser {
         Expr value = expression();
         consume(TokenType.SEMICOLON, "Se esperaba ';' después del valor");
         return new Stmt.Print(value);
+    }
+
+    private Stmt inputStmt() {
+        Token keyword = previous();
+        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la variable en la cual guardar la entrada");
+        Expr prompt = null;
+
+        if (!check(TokenType.SEMICOLON)) {
+            prompt = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Se esperaba ';' después de la sentencia de input");
+
+        return new Stmt.Input(keyword, name, prompt);
     }
 
     private Stmt returnStmt() {

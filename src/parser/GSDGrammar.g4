@@ -35,6 +35,7 @@ statement:
     | whileStmt
     | block
     | printStmt
+    | inputStmt
     | returnStmt
     | connectStmt
     | disconnectStmt
@@ -58,6 +59,10 @@ whileStmt:
 
 printStmt:
     'print' expression ';'
+    ;
+
+inputStmt:
+    'input' identifier (String)? ';'
     ;
 
 returnStmt:
