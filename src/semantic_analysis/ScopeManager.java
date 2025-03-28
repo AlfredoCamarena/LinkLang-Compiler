@@ -2,6 +2,7 @@ package semantic_analysis;
 
 import ast.Stmt;
 import scanner.Token;
+import scanner.TokenType;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -13,6 +14,7 @@ public class ScopeManager {
 
     public ScopeManager() {
         enterScope(); // Ámbito global
+        defineNativeFunctions();
     }
 
     public void enterScope() {
@@ -23,6 +25,21 @@ public class ScopeManager {
         if (!scopes.isEmpty()) {
             scopes.pop();
         }
+    }
+
+    public void defineNativeFunctions() {
+        defineNativeFunction("_wifi_connect");
+        defineNativeFunction("_wifi_disconnect");
+        defineNativeFunction("_wifi_scan");
+        defineNativeFunction("_wifi_signal_strength");
+        defineNativeFunction("_wifi_saved_networks");
+        defineNativeFunction("_hotspot_create");
+        defineNativeFunction("_hotspot_stop");
+        defineNativeFunction("_hotspot_status");
+    }
+
+    public void defineNativeFunction(String funcName) {
+        define(new Token(TokenType.IDENTIFIER, funcName, null, -1), SymbolType.NATIVE_FUNCTION, null);
     }
 
     public void define(Token name, SymbolType type, Stmt statement) {

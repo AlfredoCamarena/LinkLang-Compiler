@@ -47,7 +47,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         for (Expr argument : expr.arguments) {
             argument.accept(this);
         }
-        checkFuncArguments(expr.callee, expr.arguments);
+        checkArgumentsCount(expr.callee, expr.arguments);
         return null;
     }
 
@@ -198,7 +198,11 @@ public class SemanticAnalyzer implements Visitor<Void> {
     private Boolean checkDoubleDecl(Token name, String entityType) {
         Symbol existingSymbol = scopeManager.lookupLocal(name);
         if (existingSymbol != null) {
-            LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
+            if (existingSymbol.token().line() == -1) {
+                LinkLang.error(name, "Existe una función nativa llamada '" + name.lexeme() + "', no puedes crear una función con ese nombre.");
+            } else {
+                LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
+            }
             return true;
         }
         return false;
@@ -211,15 +215,28 @@ public class SemanticAnalyzer implements Visitor<Void> {
         }
     }
 
-    private void checkFuncArguments(Expr.Variable callee, List<Expr> arguments) {
+    private void checkArgumentsCount(Expr.Variable callee, List<Expr> arguments) {
         Token name = callee.name;
         Symbol symbol = scopeManager.lookup(name);
         if (symbol != null && symbol.type() == SymbolType.FUNCTION) {
             Stmt.Function function = (Stmt.Function) symbol.statement();
             if (arguments.size() != function.parameters.size()) {
-                LinkLang.error(name, "Número incorrecto de argumentos para la función '" + name.lexeme() + "'. Se esperaban " + function.parameters.size() + " argumentos.");
+                argumentsError(name, function.parameters.size());
+            }
+        } else if (symbol != null && symbol.type() == SymbolType.NATIVE_FUNCTION) {
+            int argumentsCount = switch (name.lexeme()) {
+                case "_wifi_signal_strength" -> 1;
+                case "_wifi_connect", "_hotspot_create" -> 2;
+                default -> 0;
+            };
+            if (arguments.size() != argumentsCount) {
+                argumentsError(name, argumentsCount);
             }
         }
+    }
+
+    private void argumentsError(Token name, int argumentsCount) {
+        LinkLang.error(name, "Número incorrecto de argumentos para la función '" + name.lexeme() + "'. Se esperaban " + argumentsCount + " argumentos.");
     }
 
     private void checkValidUnaryOperand(Expr.Unary expr) {
