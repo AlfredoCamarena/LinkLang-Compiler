@@ -44,6 +44,13 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Expr.Call expr) {
         expr.callee.accept(this);
+
+        Token name = expr.callee.name;
+        Symbol calleeSym = scopeManager.lookup(name);
+        if (calleeSym != null && calleeSym.type() != SymbolType.FUNCTION) {
+            LinkLang.error(name, "Solo puedes llamar a funciones, '" + name.lexeme() + "' no es una función.");
+        }
+
         for (Expr argument : expr.arguments) {
             argument.accept(this);
         }
