@@ -204,15 +204,14 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     private Boolean checkDoubleDecl(Token name, String entityType) {
         Symbol existingSymbol = scopeManager.lookupLocal(name);
-        if (existingSymbol != null) {
-            if (existingSymbol.token().line() == -1) {
-                LinkLang.error(name, "Existe una función nativa llamada '" + name.lexeme() + "', no puedes crear una función con ese nombre.");
-            } else {
-                LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
-            }
-            return true;
+        if (existingSymbol == null) return false;
+
+        if (existingSymbol.token().line() == -1) {
+            LinkLang.error(name, "Existe una función nativa llamada '" + name.lexeme() + "', no puedes crear una función con ese nombre.");
+        } else {
+            LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
         }
-        return false;
+        return true;
     }
 
     private void checkDeclared(Token name) {
