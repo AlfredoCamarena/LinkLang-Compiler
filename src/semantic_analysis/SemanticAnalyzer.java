@@ -303,8 +303,6 @@ public class SemanticAnalyzer implements Visitor<Void> {
             if (value instanceof Boolean) return (boolean) value ? TokenType.TRUE : TokenType.FALSE;
             if (value instanceof String) return TokenType.STRING;
         } else if (expr instanceof Expr.Variable) {
-            if (isInsideFunction)
-                return null;
             Symbol symbol = scopeManager.lookup(((Expr.Variable) expr).name);
             if (symbol != null) {
                 if (symbol.type() == SymbolType.VARIABLE) {
