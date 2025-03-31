@@ -297,7 +297,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
         if (expr instanceof Expr.Variable variable) {
             Symbol symbol = scopeManager.lookup(variable.name);
-            if (symbol == null) return null;
+            if (symbol == null || symbol.type == SymbolType.PARAMETER) return null;
 
             Expr value = symbol.value;
             if (value == null) {
