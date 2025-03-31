@@ -37,8 +37,6 @@ statement:
     | printStmt
     | inputStmt
     | returnStmt
-    | connectStmt
-    | disconnectStmt
     | exprStmt
     ;
 
@@ -67,13 +65,6 @@ inputStmt:
 
 returnStmt:
     'return' expression? ';'
-    ;
-
-connectStmt:
-    'connect' String (String)? ';'
-    ;
-disconnectStmt:
-    'disconnect' ';'
     ;
 
 exprStmt:

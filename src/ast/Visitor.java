@@ -36,8 +36,4 @@ public interface Visitor<R> {
     R visit(Stmt.Print stmt);
 
     R visit(Stmt.Input stmt);
-
-    R visit(Stmt.Connect stmt);
-
-    R visit(Stmt.Disconnect stmt);
 }

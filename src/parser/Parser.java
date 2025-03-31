@@ -243,8 +243,6 @@ public class Parser {
         if (match(TokenType.PRINT)) return printSmt();
         if (match(TokenType.INPUT)) return inputStmt();
         if (match(TokenType.RETURN)) return returnStmt();
-        if (match(TokenType.CONNECT)) return connectStmt();
-        if (match(TokenType.DISCONNECT)) return disconnectStmt();
 
         return exprStmt();
     }
@@ -345,21 +343,6 @@ public class Parser {
         return new Stmt.Return(keyword, value);
     }
 
-    private Stmt connectStmt() {
-        Expr ssid = expression();
-        Expr password = null;
-        if (!check(TokenType.SEMICOLON)) {
-            password = expression();
-        }
-        consume(TokenType.SEMICOLON, "Se esperaba ';'.");
-        return new Stmt.Connect(ssid, password);
-    }
-
-    private Stmt disconnectStmt() {
-        consume(TokenType.SEMICOLON, "Se esperaba ';'.");
-        return new Stmt.Disconnect();
-    }
-
     private Stmt exprStmt() {
         Expr expr = expression();
         consume(TokenType.SEMICOLON, "Se esperaba ';' después de la expresión.");
@@ -425,8 +408,6 @@ public class Parser {
                 case PRINT:
                 case RETURN:
                 case LEFT_BRACE:
-                case CONNECT:
-                case DISCONNECT:
                     return;
             }
 

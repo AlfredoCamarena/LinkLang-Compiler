@@ -117,16 +117,6 @@ public class AstPrinter implements Visitor<String> {
         return parenthesize("while", stmt.condition, stmt.body);
     }
 
-    @Override
-    public String visit(Stmt.Connect stmt) {
-        return parenthesize("connect", stmt.ssid, stmt.password);
-    }
-
-    @Override
-    public String visit(Stmt.Disconnect stmt) {
-        return "(disconnect)";
-    }
-
     private String parenthesize(String name, Node... nodes) {
         StringBuilder builder = new StringBuilder();
         builder.append("(").append(name);

@@ -189,20 +189,6 @@ public class SemanticAnalyzer implements Visitor<Void> {
         return null;
     }
 
-    @Override
-    public Void visit(Stmt.Connect stmt) {
-        stmt.ssid.accept(this);
-        if (stmt.password != null) {
-            stmt.password.accept(this);
-        }
-        return null;
-    }
-
-    @Override
-    public Void visit(Stmt.Disconnect stmt) {
-        return null;
-    }
-
     private Boolean checkDoubleDecl(Token name, String entityType) {
         Symbol existingSymbol = scopeManager.lookupLocal(name);
         if (existingSymbol == null) return false;

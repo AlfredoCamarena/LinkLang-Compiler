@@ -24,9 +24,6 @@ public class Scanner {
         keywords.put("true", TokenType.TRUE);
         keywords.put("var", TokenType.VAR);
         keywords.put("while", TokenType.WHILE);
-        // TODO: Buscar las palabras reservadas finales
-        keywords.put("connect", TokenType.CONNECT);
-        keywords.put("disconnect", TokenType.DISCONNECT);
         keywords.put("print", TokenType.PRINT);
         keywords.put("input", TokenType.INPUT);
     }

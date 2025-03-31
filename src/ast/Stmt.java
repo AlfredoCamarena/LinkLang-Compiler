@@ -140,28 +140,4 @@ public abstract class Stmt extends Node {
             return visitor.visit(this);
         }
     }
-
-    // TODO Agregar clases para sentencias propias
-
-    public static class Connect extends Stmt {
-        public final Expr ssid;
-        public final Expr password;
-
-        public Connect(Expr ssid, Expr password) {
-            this.ssid = ssid;
-            this.password = password;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
-
-    public static class Disconnect extends Stmt {
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visit(this);
-        }
-    }
 }
