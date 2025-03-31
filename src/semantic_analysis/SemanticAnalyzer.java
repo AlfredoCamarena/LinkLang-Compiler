@@ -297,24 +297,23 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     private TokenType getType(Expr expr) {
-        if (expr instanceof Expr.Literal) {
-            Object value = ((Expr.Literal) expr).value;
+        if (expr instanceof Expr.Literal literal) {
+            Object value = literal.value;
             if (value instanceof Double) return TokenType.NUMBER;
             if (value instanceof Boolean) return (boolean) value ? TokenType.TRUE : TokenType.FALSE;
             if (value instanceof String) return TokenType.STRING;
-        } else if (expr instanceof Expr.Variable) {
-            Symbol symbol = scopeManager.lookup(((Expr.Variable) expr).name);
-            if (symbol != null) {
-                if (symbol.type() == SymbolType.VARIABLE) {
-                    Stmt.VarDeclaration variable = (Stmt.VarDeclaration) symbol.statement();
-                    if (variable.initializer != null) {
-                        return getType(variable.initializer);
-                    } else {
-                        LinkLang.error(symbol.token(), "La variable '" + symbol.token().lexeme() + "' no fue inicializada");
-                        return null;
-                    }
-                }
+        }
+
+        if (expr instanceof Expr.Variable variable) {
+            Symbol symbol = scopeManager.lookup(variable.name);
+            if (symbol == null) return null;
+
+            Stmt.VarDeclaration varDeclaration = (Stmt.VarDeclaration) symbol.statement();
+            if (varDeclaration.initializer == null) {
+                LinkLang.error(symbol.token(), "La variable '" + symbol.token().lexeme() + "' no fue inicializada");
+                return null;
             }
+            return getType(varDeclaration.initializer);
         }
         return null;
     }
