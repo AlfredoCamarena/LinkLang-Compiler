@@ -94,6 +94,11 @@ public class AstPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visit(Stmt.Input stmt) {
+        return ""; // TODO
+    }
+
+    @Override
     public String visit(Stmt.Return stmt) {
         if (stmt.value == null) return "(return)";
         return parenthesize("return", stmt.value);
