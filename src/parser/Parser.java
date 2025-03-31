@@ -30,7 +30,7 @@ public class Parser {
 
     private Stmt declaration() {
         try {
-            if (match(TokenType.FUNC)) return function("función");
+            if (match(TokenType.FUNC)) return function();
             if (match(TokenType.VAR)) return varDecl();
 
             return statement();
@@ -40,10 +40,10 @@ public class Parser {
         }
     }
 
-    private Stmt.Function function(String kind) {
-        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de " + kind + ".");
+    private Stmt.Function function() {
+        Token name = consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la función.");
 
-        consume(TokenType.LEFT_PAREN, "Se esperaba '(' después del nombre de  " + kind + ".");
+        consume(TokenType.LEFT_PAREN, "Se esperaba '(' después del nombre de la función.");
 
         List<Token> parameters = new ArrayList<>();
         if (!check(TokenType.RIGHT_PAREN)) {
@@ -55,7 +55,7 @@ public class Parser {
 
         consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los parámetros.");
 
-        consume(TokenType.LEFT_BRACE, "Se esperaba '{' antes del cuerpo de  " + kind + ".");
+        consume(TokenType.LEFT_BRACE, "Se esperaba '{' antes del cuerpo de la función.");
 
         Stmt.Block body = block();
 
