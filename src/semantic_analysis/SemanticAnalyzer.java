@@ -23,6 +23,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Expr.Assignment expr) {
         expr.value.accept(this);
+        scopeManager.assignValue(expr.name, expr.value);
         return null;
     }
 
@@ -47,7 +48,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
         Token name = expr.callee.name;
         Symbol calleeSym = scopeManager.lookup(name);
-        if (calleeSym != null && calleeSym.type() != SymbolType.FUNCTION) {
+        if (calleeSym != null && calleeSym.type != SymbolType.FUNCTION) {
             LinkLang.error(name, "Solo puedes llamar a funciones, '" + name.lexeme() + "' no es una función.");
         }
 
@@ -94,7 +95,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         isInsideFunction = true;
 
         for (Token param : stmt.parameters) {
-            scopeManager.define(param, SymbolType.PARAMETER, new Stmt.VarDeclaration(param, null));
+            scopeManager.define(param, SymbolType.PARAMETER, null, new Stmt.VarDeclaration(param, null));
         }
 
         stmt.body.accept(this);
@@ -102,7 +103,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         isInsideFunction = prevContext;
 
         scopeManager.exitScope();
-        scopeManager.define(stmt.name, SymbolType.FUNCTION, stmt);
+        scopeManager.define(stmt.name, SymbolType.FUNCTION, null, stmt);
         return null;
     }
 
@@ -125,7 +126,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         if (stmt.initializer != null) {
             stmt.initializer.accept(this);
         }
-        scopeManager.define(stmt.name, SymbolType.VARIABLE, stmt);
+        scopeManager.define(stmt.name, SymbolType.VARIABLE, stmt.initializer, stmt);
         return null;
     }
 
@@ -184,7 +185,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
             }
         }
 
-        scopeManager.define(stmt.name, SymbolType.VARIABLE, stmt);
+        scopeManager.define(stmt.name, SymbolType.VARIABLE, null, stmt);
         return null;
     }
 
@@ -206,10 +207,10 @@ public class SemanticAnalyzer implements Visitor<Void> {
         Symbol existingSymbol = scopeManager.lookupLocal(name);
         if (existingSymbol == null) return false;
 
-        if (existingSymbol.token().line() == -1) {
+        if (existingSymbol.token.line() == -1) {
             LinkLang.error(name, "Existe una función nativa llamada '" + name.lexeme() + "', no puedes crear una función con ese nombre.");
         } else {
-            LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token().line());
+            LinkLang.error(name, "La " + entityType + " '" + name.lexeme() + "' ya fue declarada en la línea " + existingSymbol.token.line());
         }
         return true;
     }
@@ -226,9 +227,9 @@ public class SemanticAnalyzer implements Visitor<Void> {
         Symbol symbol = scopeManager.lookup(name);
         if (symbol == null) return;
 
-        switch (symbol.type()) {
+        switch (symbol.type) {
             case FUNCTION -> {
-                Stmt.Function function = (Stmt.Function) symbol.statement();
+                Stmt.Function function = (Stmt.Function) symbol.statement;
                 if (arguments.size() != function.parameters.size()) {
                     argumentsError(name, function.parameters.size());
                 }
@@ -312,12 +313,12 @@ public class SemanticAnalyzer implements Visitor<Void> {
             Symbol symbol = scopeManager.lookup(variable.name);
             if (symbol == null) return null;
 
-            Stmt.VarDeclaration varDeclaration = (Stmt.VarDeclaration) symbol.statement();
-            if (varDeclaration.initializer == null) {
-                LinkLang.error(symbol.token(), "La variable '" + symbol.token().lexeme() + "' no fue inicializada");
+            Expr value = symbol.value;
+            if (value == null) {
+                LinkLang.error(symbol.token, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
                 return null;
             }
-            return getType(varDeclaration.initializer);
+            return getType(value);
         }
         return null;
     }

@@ -1,5 +1,6 @@
 package semantic_analysis;
 
+import ast.Expr;
 import ast.Stmt;
 import scanner.Token;
 import scanner.TokenType;
@@ -39,15 +40,20 @@ public class ScopeManager {
     }
 
     public void defineNativeFunction(String funcName) {
-        define(new Token(TokenType.IDENTIFIER, funcName, null, -1), SymbolType.NATIVE_FUNCTION, null);
+        define(new Token(TokenType.IDENTIFIER, funcName, null, -1), SymbolType.NATIVE_FUNCTION, null, null);
     }
 
-    public void define(Token name, SymbolType type, Stmt statement) {
+    public void define(Token name, SymbolType type, Expr value, Stmt statement) {
         Map<String, Symbol> currentScope = scopes.peek();
 
         assert currentScope != null;
-        currentScope.put(name.lexeme(), new Symbol(name, type, statement,
+        currentScope.put(name.lexeme(), new Symbol(name, type, value, statement,
                 scopes.size() == 1 ? ScopeType.GLOBAL : ScopeType.LOCAL));
+    }
+
+    public void assignValue(Token name, Expr value) {
+        Symbol symbol = lookup(name);
+        symbol.setValue(value);
     }
 
     public Symbol lookup(Token name) {
