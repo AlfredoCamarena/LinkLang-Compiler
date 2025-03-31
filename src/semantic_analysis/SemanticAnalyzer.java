@@ -225,19 +225,24 @@ public class SemanticAnalyzer implements Visitor<Void> {
     private void checkArgumentsCount(Expr.Variable callee, List<Expr> arguments) {
         Token name = callee.name;
         Symbol symbol = scopeManager.lookup(name);
-        if (symbol != null && symbol.type() == SymbolType.FUNCTION) {
-            Stmt.Function function = (Stmt.Function) symbol.statement();
-            if (arguments.size() != function.parameters.size()) {
-                argumentsError(name, function.parameters.size());
+        if (symbol == null) return;
+
+        switch (symbol.type()) {
+            case FUNCTION -> {
+                Stmt.Function function = (Stmt.Function) symbol.statement();
+                if (arguments.size() != function.parameters.size()) {
+                    argumentsError(name, function.parameters.size());
+                }
             }
-        } else if (symbol != null && symbol.type() == SymbolType.NATIVE_FUNCTION) {
-            int argumentsCount = switch (name.lexeme()) {
-                case "_wifi_signal_strength" -> 1;
-                case "_wifi_connect", "_hotspot_create" -> 2;
-                default -> 0;
-            };
-            if (arguments.size() != argumentsCount) {
-                argumentsError(name, argumentsCount);
+            case NATIVE_FUNCTION -> {
+                int argumentsCount = switch (name.lexeme()) {
+                    case "_wifi_signal_strength" -> 1;
+                    case "_wifi_connect", "_hotspot_create" -> 2;
+                    default -> 0;
+                };
+                if (arguments.size() != argumentsCount) {
+                    argumentsError(name, argumentsCount);
+                }
             }
         }
     }
