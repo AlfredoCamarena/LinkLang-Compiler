@@ -48,7 +48,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
         Token name = expr.callee.name;
         Symbol calleeSym = scopeManager.lookup(name);
-        if (calleeSym != null && calleeSym.type != SymbolType.FUNCTION) {
+        if (calleeSym != null && calleeSym.type != SymbolType.FUNCTION && calleeSym.type != SymbolType.NATIVE_FUNCTION) {
             LinkLang.error(name, "Solo puedes llamar a funciones, '" + name.lexeme() + "' no es una función.");
         }
 
