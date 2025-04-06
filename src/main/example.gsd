@@ -1,26 +1,19 @@
-var x = y;
+input ssid "SSID del wifi: ";
+input pass "Contraseña del wifi: ";
 
-func sumar(a,b){
-    print a + b;
+if (_wifi_connect(ssid, pass)) {
+    print "Conectado";
+} else {
+    print "No se pudo conectar";
 }
 
-restar(2,3);
-sumar(1,2,3);
+{
+    var ssid = "mihotspot";
+    var pass = "abcd";
 
-var a = "hola";
-var b = a + 1;
-
-print 5 * "hola";
-print 5 / "hola";
-
-print -"5";
-print !"5";
-
-func sumar(){}
-
-var x;
-
-return 5;
-
-var f;
-var g = f + 1;
+    if (_hotspot_create(ssid, pass)) {
+        print "Hotspot creado con éxito";
+    } else {
+        print "No se pudo crear el hotspot";
+    }
+}

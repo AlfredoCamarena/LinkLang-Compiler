@@ -2,6 +2,8 @@ package main;
 
 import ast.AstPrinter;
 import ast.Stmt;
+import intermediate_code.Generator;
+import intermediate_code.Quadruple;
 import parser.Parser;
 import scanner.Scanner;
 import scanner.Token;
@@ -62,9 +64,19 @@ public class LinkLang {
 
         if (hadError) return;
 
+        Generator quadrupleGenerator = new Generator(scopeManager);
+        List<Quadruple> quadruples = quadrupleGenerator.generate(statements);
+
         //printTokens(tokens);
         //printAst(statements);
-        System.out.println(scopeManager);
+        //System.out.println(scopeManager);
+        printQuadruples(quadruples);
+    }
+
+    private static void printQuadruples(List<Quadruple> quadruples) {
+        for (int i = 0; i < quadruples.size(); i++) {
+            System.out.println(i + ": " + quadruples.get(i));
+        }
     }
 
     private static void printTokens(List<Token> tokens) {
