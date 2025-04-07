@@ -11,6 +11,7 @@ public enum OpCode {
     LESS_EQUAL,
     AND,
     OR,
+    NOT,
     ASSIGN,
     CALL,
     NATIVE_CALL,

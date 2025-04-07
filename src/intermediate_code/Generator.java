@@ -227,6 +227,7 @@ public class Generator implements Visitor<String> {
             case ">=" -> OpCode.GREATER_EQUAL;
             case "and" -> OpCode.AND;
             case "or" -> OpCode.OR;
+            case "!" -> OpCode.NOT;
             default -> null;
         };
     }
