@@ -201,18 +201,22 @@ public class SemanticAnalyzer implements Visitor<Void> {
         return true;
     }
 
-    private void checkDeclared(Token name) {
+    private Boolean checkDeclared(Token name) {
         Symbol symbol = scopeManager.lookup(name);
         if (symbol == null) {
             LinkLang.error(name, "Asegurate de declarar '" + name.lexeme() + "' antes de usarla.");
+            return false;
         }
+        return true;
     }
 
-    private void checkInit(Token name) {
+    private Boolean checkInit(Token name) {
         Symbol symbol = scopeManager.lookup(name);
         if (symbol != null && symbol.value == null) {
             LinkLang.error(name, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
+            return false;
         }
+        return true;
     }
 
     private void checkArgumentsCount(Expr.Variable callee, List<Expr> arguments) {
