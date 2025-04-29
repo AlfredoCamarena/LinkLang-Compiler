@@ -78,6 +78,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Variable expr) {
+        checkInit(expr.name);
         checkDeclared(expr.name);
         return null;
     }
@@ -207,6 +208,13 @@ public class SemanticAnalyzer implements Visitor<Void> {
         }
     }
 
+    private void checkInit(Token name) {
+        Symbol symbol = scopeManager.lookup(name);
+        if (symbol != null && symbol.value == null) {
+            LinkLang.error(name, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
+        }
+    }
+
     private void checkArgumentsCount(Expr.Variable callee, List<Expr> arguments) {
         Token name = callee.name;
         Symbol symbol = scopeManager.lookup(name);
@@ -299,11 +307,9 @@ public class SemanticAnalyzer implements Visitor<Void> {
             if (symbol == null || symbol.type == SymbolType.PARAMETER) return null;
 
             Expr value = symbol.value;
-            if (value == null) {
-                LinkLang.error(symbol.token, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
-                return null;
+            if (value != null) {
+                return getType(value);
             }
-            return getType(value);
         }
         return null;
     }
