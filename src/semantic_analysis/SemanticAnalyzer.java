@@ -5,7 +5,6 @@ import ast.Stmt;
 import ast.Visitor;
 import main.LinkLang;
 import scanner.Token;
-import scanner.TokenType;
 
 import java.util.List;
 
@@ -180,7 +179,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
         if (stmt.prompt != null) {
             stmt.prompt.accept(this);
 
-            if (getType(stmt.prompt) != TokenType.STRING) {
+            if (getType(stmt.prompt) != SemanticType.STRING) {
                 LinkLang.error(stmt.keyword, "Se esperaba un String para el mensaje del input");
             }
         }
@@ -238,7 +237,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     private void checkValidUnaryOperand(Expr.Unary expr) {
-        TokenType operandType = getType(expr.right);
+        SemanticType operandType = getType(expr.right);
 
         if (operandType == null) {
             return;
@@ -246,13 +245,13 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
         switch (expr.operator.type()) {
             case MINUS:
-                if (operandType != TokenType.NUMBER) {
+                if (operandType != SemanticType.NUMBER) {
                     LinkLang.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números");
                 }
                 break;
 
             case BANG:
-                if (operandType != TokenType.TRUE && operandType != TokenType.FALSE) {
+                if (operandType != SemanticType.TRUE && operandType != SemanticType.FALSE) {
                     LinkLang.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con booleanos");
                 }
                 break;
@@ -260,8 +259,8 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     private void checkValidBinaryOperands(Expr.Binary expr) {
-        TokenType leftType = getType(expr.left);
-        TokenType rightType = getType(expr.right);
+        SemanticType leftType = getType(expr.left);
+        SemanticType rightType = getType(expr.right);
 
         if (leftType == null || rightType == null) {
             return;
@@ -269,8 +268,8 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
         switch (expr.operator.type()) {
             case PLUS:
-                if ((leftType == TokenType.STRING && rightType == TokenType.STRING) ||
-                        (leftType == TokenType.NUMBER && rightType == TokenType.NUMBER)) {
+                if ((leftType == SemanticType.STRING && rightType == SemanticType.STRING) ||
+                        (leftType == SemanticType.NUMBER && rightType == SemanticType.NUMBER)) {
                     return;
                 }
                 LinkLang.error(expr.operator, "No puedes sumar una cadena con un número.");
@@ -279,7 +278,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
             case STAR:
             case MINUS:
             case SLASH:
-                if (leftType == TokenType.NUMBER && rightType == TokenType.NUMBER) {
+                if (leftType == SemanticType.NUMBER && rightType == SemanticType.NUMBER) {
                     return;
                 }
                 LinkLang.error(expr.operator, "El operador '" + expr.operator.lexeme() + "' solo trabaja con números.");
@@ -287,12 +286,12 @@ public class SemanticAnalyzer implements Visitor<Void> {
         }
     }
 
-    private TokenType getType(Expr expr) {
+    private SemanticType getType(Expr expr) {
         if (expr instanceof Expr.Literal literal) {
             Object value = literal.value;
-            if (value instanceof Double) return TokenType.NUMBER;
-            if (value instanceof Boolean) return (boolean) value ? TokenType.TRUE : TokenType.FALSE;
-            if (value instanceof String) return TokenType.STRING;
+            if (value instanceof Double) return SemanticType.NUMBER;
+            if (value instanceof Boolean) return (boolean) value ? SemanticType.TRUE : SemanticType.FALSE;
+            if (value instanceof String) return SemanticType.STRING;
         }
 
         if (expr instanceof Expr.Variable variable) {
@@ -307,5 +306,13 @@ public class SemanticAnalyzer implements Visitor<Void> {
             return getType(value);
         }
         return null;
+    }
+
+    public enum SemanticType {
+        NUMBER,
+        TRUE,
+        FALSE,
+        STRING,
+        ARRAY,
     }
 }
