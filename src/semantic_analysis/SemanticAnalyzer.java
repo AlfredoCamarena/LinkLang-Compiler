@@ -22,7 +22,9 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Expr.Assignment expr) {
         expr.value.accept(this);
-        scopeManager.assignValue(expr.name, expr.value);
+        if (checkDeclared(expr.name)) {
+            scopeManager.assignValue(expr.name, expr.value);
+        }
         return null;
     }
 
