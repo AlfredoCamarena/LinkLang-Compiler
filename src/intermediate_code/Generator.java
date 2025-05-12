@@ -69,7 +69,18 @@ public class Generator implements Visitor<String> {
 
     @Override
     public String visit(Expr.Literal expr) {
-        return expr.value == null ? "null" : expr.value.toString();
+        if (expr.value == null) {
+            return null;
+        }
+
+        String valueLex;
+        if (expr.value instanceof Double number && number % 1 == 0) {
+            valueLex = String.valueOf((int) number.doubleValue());
+        } else {
+            valueLex = expr.value.toString();
+        }
+        
+        return valueLex;
     }
 
     @Override
