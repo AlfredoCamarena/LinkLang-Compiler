@@ -29,6 +29,33 @@ public class SemanticAnalyzer implements Visitor<Void> {
     }
 
     @Override
+    public Void visit(Expr.Array expr) {
+        // Caso 1: Array con tamaño explícito [size:default]
+        if (expr.size != null) {
+            expr.size.accept(this);
+
+            SemanticType sizeType = getType(expr.size);
+            if (sizeType != SemanticType.NUMBER) {
+                LinkLang.error(expr.name, "El tamaño del array debe ser un número");
+            }
+
+            if (expr.fillValue != null) {
+                expr.fillValue.accept(this);
+            }
+        }
+
+        if (expr.values != null) {
+            for (Expr value : expr.values) {
+                if (value != null) {
+                    value.accept(this);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public Void visit(Expr.Logical expr) {
         expr.left.accept(this);
         expr.right.accept(this);
@@ -68,6 +95,52 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Literal expr) {
+        return null;
+    }
+
+    @Override
+    public Void visit(Expr.Subscript expr) {
+        expr.var.accept(this);
+        Token name = expr.var.name;
+
+        Symbol exprSym = scopeManager.lookup(name);
+
+        if (exprSym == null || exprSym.value == null)
+            return null;
+
+        SemanticType valueType = getType(exprSym.value);
+
+        if (valueType == SemanticType.CALL) {
+            return null;
+        }
+
+        if (valueType != SemanticType.ARRAY) {
+            LinkLang.error(expr.name, "La variable no contiene un arreglo");
+            return null;
+        }
+
+        expr.index.accept(this);
+        Expr.Array array = (Expr.Array) exprSym.value;
+
+        if (array.values == null && array.fillValue == null) {
+            LinkLang.error(expr.name, "El arreglo '" + name.lexeme() + "' está vacío.");
+            return null;
+        }
+
+        if (getType(expr.index) != SemanticType.NUMBER) {
+            return null;
+        }
+
+        try {
+            double arraySize = array.values.size();
+            double indexValue = (Double) ((Expr.Literal) expr.index).value;
+
+            if (indexValue >= arraySize) {
+                LinkLang.error(expr.name, "Índice fuera de rango. Debe estar entre 0 y " + (int) (arraySize - 1));
+            }
+        } catch (ClassCastException e) {
+            LinkLang.error(expr.name, "El índice del arreglo debe ser un número entero.");
+        }
         return null;
     }
 
@@ -214,7 +287,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     private Boolean checkInit(Token name) {
         Symbol symbol = scopeManager.lookup(name);
-        if (symbol != null && symbol.value == null) {
+        if (symbol != null && symbol.value == null && symbol.type != SymbolType.FUNCTION) {
             LinkLang.error(name, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
             return false;
         }
@@ -280,10 +353,9 @@ public class SemanticAnalyzer implements Visitor<Void> {
             return;
         }
 
-        switch (expr.operator.type()) {
+        switch (expr.operator.type()) { // TODO mejorar y agregar arreglos
             case PLUS:
-                if ((leftType == SemanticType.STRING && rightType == SemanticType.STRING) ||
-                        (leftType == SemanticType.NUMBER && rightType == SemanticType.NUMBER)) {
+                if (leftType == rightType) {
                     return;
                 }
                 LinkLang.error(expr.operator, "No puedes sumar una cadena con un número.");
@@ -308,6 +380,14 @@ public class SemanticAnalyzer implements Visitor<Void> {
             if (value instanceof String) return SemanticType.STRING;
         }
 
+        if (expr instanceof Expr.Call) {
+            return SemanticType.CALL;
+        }
+
+        if (expr instanceof Expr.Array) {
+            return SemanticType.ARRAY;
+        }
+
         if (expr instanceof Expr.Variable variable) {
             Symbol symbol = scopeManager.lookup(variable.name);
             if (symbol == null || symbol.type == SymbolType.PARAMETER) return null;
@@ -326,5 +406,6 @@ public class SemanticAnalyzer implements Visitor<Void> {
         FALSE,
         STRING,
         ARRAY,
+        CALL,
     }
 }

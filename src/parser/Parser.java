@@ -191,7 +191,42 @@ public class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return primary();
+        return subscript();
+    }
+
+    private Expr subscript() {
+        Expr expr = call();
+        Token name = previous();
+
+        if (match(TokenType.LEFT_BRACKET)) {
+            if (check(TokenType.MINUS)) {
+                LinkLang.error(name, "El índice no puede ser negativo");
+            }
+            Expr index = addition();
+            consume(TokenType.RIGHT_BRACKET, "Se esperaba ']' después del índice.");
+            expr = new Expr.Subscript((Expr.Variable) expr, name, index);
+        }
+        return expr;
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+
+        if (match(TokenType.LEFT_PAREN)) {
+            List<Expr> arguments = new ArrayList<>();
+
+            if (!check(TokenType.RIGHT_PAREN)) {
+                do {
+                    arguments.add(expression());
+                } while (match(TokenType.COMMA));
+            }
+
+            Token paren = consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los argumentos.");
+
+            return new Expr.Call((Expr.Variable) expr, paren, arguments);
+        }
+
+        return expr;
     }
 
     private Expr primary() {
@@ -202,13 +237,35 @@ public class Parser {
 
         if (match(TokenType.IDENTIFIER)) {
             Token name = previous();
-            Expr.Variable var = new Expr.Variable(name);
-            if (match(TokenType.LEFT_PAREN)) {
-                return finishCall(var);
-            }
-            return var;
+            return new Expr.Variable(name);
         }
 
+        if (match(TokenType.LEFT_BRACKET)) {
+            Token name = previous();
+
+            // Caso 1: Array con tamaño explícito [size:fillValue]
+            if (peekNext().type() == TokenType.COLON) {
+                Expr size = expression();
+                consume(TokenType.COLON, "Se esperaba ':' después del tamaño del arreglo.");
+                Expr fillValue = null;
+                if (!check(TokenType.RIGHT_BRACKET)) {
+                    fillValue = expression();
+                }
+                consume(TokenType.RIGHT_BRACKET, "Se esperaba ']' después del valor de relleno.");
+                return new Expr.Array(name, size, fillValue);
+            }
+
+            //Caso 2: Array literal [1, 2, 3]
+            List<Expr> values = new ArrayList<>();
+            while (!match(TokenType.RIGHT_BRACKET)) {
+                values.add(expression());
+
+                if (!check(TokenType.RIGHT_BRACKET)) {
+                    consume(TokenType.COMMA, "Se esperaba una coma antes de la siguiente expresión.");
+                }
+            }
+            return new Expr.Array(name, values);
+        }
 
         // Ejemplo: (1 + 2) * 3
         if (match(TokenType.LEFT_PAREN)) {
@@ -219,21 +276,6 @@ public class Parser {
 
         throw error(peek(), "Se esperaba una expresión.");
     }
-
-    private Expr finishCall(Expr.Variable callee) {
-        List<Expr> arguments = new ArrayList<>();
-
-        if (!check(TokenType.RIGHT_PAREN)) {
-            do {
-                arguments.add(expression());
-            } while (match(TokenType.COMMA));
-        }
-
-        Token paren = consume(TokenType.RIGHT_PAREN, "Se esperaba ')' después de los argumentos.");
-
-        return new Expr.Call(callee, paren, arguments);
-    }
-
 
     private Stmt statement() {
         if (match(TokenType.FOR)) return forStmt();
@@ -388,6 +430,10 @@ public class Parser {
 
     private Token peek() {
         return tokens.get(current);
+    }
+
+    private Token peekNext() {
+        return tokens.get(current + 1);
     }
 
     private RuntimeException error(Token token, String msg) {

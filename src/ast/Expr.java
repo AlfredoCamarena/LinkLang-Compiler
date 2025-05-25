@@ -2,6 +2,7 @@ package ast;
 
 import scanner.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Expr extends Node {
@@ -13,6 +14,41 @@ public abstract class Expr extends Node {
         public Assignment(Token name, Expr value) {
             this.name = name;
             this.value = value;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visit(this);
+        }
+    }
+
+    public static class Array extends Expr {
+        public final Token name;
+        public final Expr size;
+        public final Expr fillValue;
+        public final List<Expr> values;
+
+        // Para arrays con tamaño explícito [3: 'default']
+        public Array(Token name, Expr size, Expr fillValue) {
+            this.name = name;
+            this.size = size;
+            this.fillValue = fillValue;
+            this.values = new ArrayList<>();
+
+            if (size instanceof Expr.Literal) {
+                Double arraySize = (Double) ((Expr.Literal) size).value;
+                for (int i = 0; i < arraySize; i++) {
+                    this.values.add(fillValue);
+                }
+            }
+        }
+
+        // Para arrays literales [1,2,3]
+        public Array(Token name, List<Expr> values) {
+            this.name = name;
+            this.size = new Expr.Literal(values != null ? values.size() : 0.0);
+            this.fillValue = null;
+            this.values = values;
         }
 
         @Override
@@ -92,6 +128,23 @@ public abstract class Expr extends Node {
 
         public Literal(Object value) {
             this.value = value;
+        }
+
+        @Override
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visit(this);
+        }
+    }
+
+    public static class Subscript extends Expr {
+        public final Expr.Variable var;
+        public final Token name;
+        public final Expr index;
+
+        public Subscript(Expr.Variable var, Token name, Expr index) {
+            this.var = var;
+            this.name = name;
+            this.index = index;
         }
 
         @Override

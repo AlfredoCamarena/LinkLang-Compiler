@@ -3,6 +3,8 @@ package ast;
 public interface Visitor<R> {
     R visit(Expr.Assignment expr);
 
+    R visit(Expr.Array expr);
+
     R visit(Expr.Logical expr);
 
     R visit(Expr.Binary expr);
@@ -12,6 +14,8 @@ public interface Visitor<R> {
     R visit(Expr.Group expr);
 
     R visit(Expr.Literal expr);
+
+    R visit(Expr.Subscript expr);
 
     R visit(Expr.Unary expr);
 

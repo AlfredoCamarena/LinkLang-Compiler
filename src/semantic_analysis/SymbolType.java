@@ -4,5 +4,5 @@ public enum SymbolType {
     VARIABLE,
     PARAMETER,
     FUNCTION,
-    NATIVE_FUNCTION
+    NATIVE_FUNCTION,
 }

@@ -12,6 +12,11 @@ public class AstPrinter implements Visitor<String> {
     }
 
     @Override
+    public String visit(Expr.Array expr) {
+        return ""; //TODO
+    }
+
+    @Override
     public String visit(Expr.Binary expr) {
         return parenthesize(expr.operator.lexeme(), expr.left, expr.right);
     }
@@ -30,6 +35,11 @@ public class AstPrinter implements Visitor<String> {
     public String visit(Expr.Literal expr) {
         if (expr.value == null) return "nil";
         return expr.value.toString();
+    }
+
+    @Override
+    public String visit(Expr.Subscript expr) {
+        return ""; //TODO
     }
 
     @Override

@@ -8,6 +8,7 @@ import semantic_analysis.Symbol;
 import semantic_analysis.SymbolType;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 public class Generator implements Visitor<String> {
     private final ScopeManager scopeManager;
@@ -30,6 +31,29 @@ public class Generator implements Visitor<String> {
         String value = expr.value.accept(this);
         quadManager.addQuadruple(OpCode.ASSIGN, value, null, expr.name.lexeme());
         return value;
+    }
+
+    @Override
+    public String visit(Expr.Array expr) {
+        if (expr.fillValue != null) {
+            expr.fillValue.accept(this);
+        }
+
+        if (expr.size != null) {
+            expr.size.accept(this);
+        }
+
+        StringBuilder values = new StringBuilder("[");
+        if (expr.values != null) {
+            StringJoiner joiner = new StringJoiner(", ");
+            for (Expr value : expr.values) {
+                String valueLex = value != null ? value.accept(this) : "null";
+                joiner.add(valueLex);
+            }
+            values.append(joiner);
+        }
+        values.append(']');
+        return values.toString(); // TODO
     }
 
     @Override
@@ -79,8 +103,13 @@ public class Generator implements Visitor<String> {
         } else {
             valueLex = expr.value.toString();
         }
-        
+
         return valueLex;
+    }
+
+    @Override
+    public String visit(Expr.Subscript expr) {
+        return String.format("%s[%s]", expr.name.lexeme(), expr.index.accept(this));
     }
 
     @Override
