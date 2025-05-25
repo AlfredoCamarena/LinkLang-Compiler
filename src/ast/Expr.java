@@ -2,17 +2,16 @@ package ast;
 
 import scanner.Token;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Expr extends Node {
 
     public static class Assignment extends Expr {
-        public final Token name;
+        public final Expr target;
         public final Expr value;
 
-        public Assignment(Token name, Expr value) {
-            this.name = name;
+        public Assignment(Expr target, Expr value) {
+            this.target = target;
             this.value = value;
         }
 
@@ -31,22 +30,15 @@ public abstract class Expr extends Node {
         // Para arrays con tamaño explícito [3: 'default']
         public Array(Token name, Expr size, Expr fillValue) {
             this.name = name;
-            this.size = size;
+            this.size = size;       // No expandir aquí, solo guardar la expresión
             this.fillValue = fillValue;
-            this.values = new ArrayList<>();
-
-            if (size instanceof Expr.Literal) {
-                Double arraySize = (Double) ((Expr.Literal) size).value;
-                for (int i = 0; i < arraySize; i++) {
-                    this.values.add(fillValue);
-                }
-            }
+            this.values = null;     // Marcar que es un array de tamaño dinámico
         }
 
         // Para arrays literales [1,2,3]
         public Array(Token name, List<Expr> values) {
             this.name = name;
-            this.size = new Expr.Literal(values != null ? values.size() : 0.0);
+            this.size = null;
             this.fillValue = null;
             this.values = values;
         }

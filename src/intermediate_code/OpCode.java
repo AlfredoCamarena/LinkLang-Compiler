@@ -23,5 +23,8 @@ public enum OpCode {
     GOTO,
     RETURN,
     PRINT,
-    INPUT
+    INPUT,
+    NEW_ARRAY,
+    ARRAY_LOAD,
+    ARRAY_STORE
 }

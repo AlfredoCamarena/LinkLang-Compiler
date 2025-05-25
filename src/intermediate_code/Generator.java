@@ -8,7 +8,6 @@ import semantic_analysis.Symbol;
 import semantic_analysis.SymbolType;
 
 import java.util.List;
-import java.util.StringJoiner;
 
 public class Generator implements Visitor<String> {
     private final ScopeManager scopeManager;
@@ -28,32 +27,41 @@ public class Generator implements Visitor<String> {
 
     @Override
     public String visit(Expr.Assignment expr) {
-        String value = expr.value.accept(this);
-        quadManager.addQuadruple(OpCode.ASSIGN, value, null, expr.name.lexeme());
-        return value;
+        if (expr.target instanceof Expr.Subscript subscript) {
+            // Caso: arr[1] = value
+            String arrayTemp = subscript.var.accept(this);
+            String indexTemp = subscript.index.accept(this);
+            String valueTemp = expr.value.accept(this);
+            quadManager.addQuadruple(OpCode.ARRAY_STORE, arrayTemp, indexTemp, valueTemp);
+            return valueTemp;
+        } else {
+            String value = expr.value.accept(this);
+            quadManager.addQuadruple(OpCode.ASSIGN, value, null, ((Expr.Variable) expr.target).name.lexeme());
+            return value;
+        }
     }
 
     @Override
     public String visit(Expr.Array expr) {
-        if (expr.fillValue != null) {
-            expr.fillValue.accept(this);
-        }
-
         if (expr.size != null) {
-            expr.size.accept(this);
-        }
+            // Caso [size:fill]
+            String sizeTemp = expr.size.accept(this);
+            String fillTemp = expr.fillValue != null ? expr.fillValue.accept(this) : "0";
+            String arrayTemp = quadManager.newTemp();
+            quadManager.addQuadruple(OpCode.NEW_ARRAY, sizeTemp, fillTemp, arrayTemp);
+            return arrayTemp;
+        } else {
+            // Caso [1,2,3]
+            String arrayTemp = quadManager.newTemp();
+            assert expr.values != null;
+            quadManager.addQuadruple(OpCode.NEW_ARRAY, String.valueOf(expr.values.size()), "null", arrayTemp);
 
-        StringBuilder values = new StringBuilder("[");
-        if (expr.values != null) {
-            StringJoiner joiner = new StringJoiner(", ");
-            for (Expr value : expr.values) {
-                String valueLex = value != null ? value.accept(this) : "null";
-                joiner.add(valueLex);
+            for (int i = 0; i < expr.values.size(); i++) {
+                String elementTemp = expr.values.get(i).accept(this);
+                quadManager.addQuadruple(OpCode.ARRAY_STORE, arrayTemp, String.valueOf(i), elementTemp);
             }
-            values.append(joiner);
+            return arrayTemp;
         }
-        values.append(']');
-        return values.toString(); // TODO
     }
 
     @Override
@@ -109,7 +117,11 @@ public class Generator implements Visitor<String> {
 
     @Override
     public String visit(Expr.Subscript expr) {
-        return String.format("%s[%s]", expr.name.lexeme(), expr.index.accept(this));
+        String arrayTemp = expr.var.accept(this);
+        String indexTemp = expr.index.accept(this);
+        String elementTemp = quadManager.newTemp();
+        quadManager.addQuadruple(OpCode.ARRAY_LOAD, arrayTemp, indexTemp, elementTemp);
+        return elementTemp;
     }
 
     @Override

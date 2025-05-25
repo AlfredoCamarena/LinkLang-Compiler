@@ -21,15 +21,30 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     @Override
     public Void visit(Expr.Assignment expr) {
+        // 1. Analizar el valor de la asignación
         expr.value.accept(this);
-        if (checkDeclared(expr.name)) {
-            scopeManager.assignValue(expr.name, expr.value);
+
+        // 2. Verificar el target (variable o array)
+        if (expr.target instanceof Expr.Variable) {
+            // Caso: x = 5
+            Token varName = ((Expr.Variable) expr.target).name;
+            if (checkDeclared(varName)) {
+                scopeManager.assignValue(varName, expr.value);
+            }
+        } else if (expr.target instanceof Expr.Subscript subscript) {
+            // Caso: arr[1] = 5
+            if (checkDeclared(subscript.var.name)) {
+                subscript.index.accept(this);
+                // No se necesita assignValue para arrays, ya que la modificación se maneja en ejecución
+            }
         }
         return null;
     }
 
     @Override
     public Void visit(Expr.Array expr) {
+        SemanticType elementType = null;
+
         // Caso 1: Array con tamaño explícito [size:default]
         if (expr.size != null) {
             expr.size.accept(this);
@@ -44,14 +59,21 @@ public class SemanticAnalyzer implements Visitor<Void> {
             }
         }
 
+        // Validar homogeneidad en arrays literales [1,2,3]
         if (expr.values != null) {
             for (Expr value : expr.values) {
                 if (value != null) {
                     value.accept(this);
+
+                    SemanticType currentType = getType(value);
+                    if (elementType == null) {
+                        elementType = currentType; // Primer elemento define el tipo esperado
+                    } else if (elementType != currentType) {
+                        LinkLang.error(expr.name, "Todos los elementos del array deben ser del mismo tipo.");
+                    }
                 }
             }
         }
-
         return null;
     }
 
@@ -101,46 +123,44 @@ public class SemanticAnalyzer implements Visitor<Void> {
     @Override
     public Void visit(Expr.Subscript expr) {
         expr.var.accept(this);
-        Token name = expr.var.name;
-
-        Symbol exprSym = scopeManager.lookup(name);
-
-        if (exprSym == null || exprSym.value == null)
-            return null;
-
-        SemanticType valueType = getType(exprSym.value);
-
-        if (valueType == SemanticType.CALL) {
-            return null;
-        }
-
-        if (valueType != SemanticType.ARRAY) {
-            LinkLang.error(expr.name, "La variable no contiene un arreglo");
-            return null;
-        }
-
         expr.index.accept(this);
-        Expr.Array array = (Expr.Array) exprSym.value;
 
-        if (array.values == null && array.fillValue == null) {
-            LinkLang.error(expr.name, "El arreglo '" + name.lexeme() + "' está vacío.");
+        Token arrayToken = expr.var.name;
+        Symbol arraySymbol = scopeManager.lookup(arrayToken);
+        if (arraySymbol == null) {
+            return null;
+        }
+
+        if (arraySymbol.type != SymbolType.ARRAY) {
+            LinkLang.error(arrayToken, "La variable '" + arrayToken.lexeme() + "' no es un arreglo.");
             return null;
         }
 
         if (getType(expr.index) != SemanticType.NUMBER) {
+            LinkLang.error(arrayToken, "El índice del arreglo debe ser un número.");
             return null;
         }
 
-        try {
-            double arraySize = array.values.size();
-            double indexValue = (Double) ((Expr.Literal) expr.index).value;
+        // Validar el rango del índice (solo para literales numéricos)
+        if (expr.index instanceof Expr.Literal) {
+            Expr.Array array = (Expr.Array) arraySymbol.value;
+            int arraySize = array.values != null ? array.values.size() :
+                    array.size instanceof Expr.Literal ?
+                            ((Double) ((Expr.Literal) array.size).value).intValue() : -1;
 
-            if (indexValue >= arraySize) {
-                LinkLang.error(expr.name, "Índice fuera de rango. Debe estar entre 0 y " + (int) (arraySize - 1));
+            if (arraySize >= 0) {
+                try {
+                    double indexValue = (Double) ((Expr.Literal) expr.index).value;
+                    if (indexValue < 0 || indexValue >= arraySize) {
+                        LinkLang.error(arrayToken,
+                                "Índice fuera de rango. El índice máximo es " + (arraySize - 1) + ".");
+                    }
+                } catch (ClassCastException e) {
+                    LinkLang.error(arrayToken, "El índice debe ser un número entero.");
+                }
             }
-        } catch (ClassCastException e) {
-            LinkLang.error(expr.name, "El índice del arreglo debe ser un número entero.");
         }
+
         return null;
     }
 
@@ -201,7 +221,9 @@ public class SemanticAnalyzer implements Visitor<Void> {
         if (stmt.initializer != null) {
             stmt.initializer.accept(this);
         }
-        scopeManager.define(stmt.name, SymbolType.VARIABLE, stmt.initializer, stmt);
+
+        SymbolType type = stmt.initializer instanceof Expr.Variable ? SymbolType.VARIABLE : SymbolType.ARRAY;
+        scopeManager.define(stmt.name, type, stmt.initializer, stmt);
         return null;
     }
 
@@ -285,13 +307,11 @@ public class SemanticAnalyzer implements Visitor<Void> {
         return true;
     }
 
-    private Boolean checkInit(Token name) {
+    private void checkInit(Token name) {
         Symbol symbol = scopeManager.lookup(name);
         if (symbol != null && symbol.value == null && symbol.type != SymbolType.FUNCTION) {
             LinkLang.error(name, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
-            return false;
         }
-        return true;
     }
 
     private void checkArgumentsCount(Expr.Variable callee, List<Expr> arguments) {
@@ -351,6 +371,11 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
         if (leftType == null || rightType == null) {
             return;
+        }
+
+        // Bloquear operaciones inválidas con arrays temporalmente
+        if (leftType == SemanticType.ARRAY || rightType == SemanticType.ARRAY) {
+            LinkLang.error(expr.operator, "Operación no soportada para arrays.");
         }
 
         switch (expr.operator.type()) { // TODO mejorar y agregar arreglos

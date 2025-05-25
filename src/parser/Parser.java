@@ -102,8 +102,9 @@ public class Parser {
             Expr value = assignment();
 
             if (expr instanceof Expr.Variable) {
-                Token name = ((Expr.Variable) expr).name;
-                return new Expr.Assignment(name, value);
+                return new Expr.Assignment(expr, value);
+            } else if (expr instanceof Expr.Subscript) {
+                return new Expr.Assignment(expr, value);
             }
 
             LinkLang.error(equals, "Solo puedes realizar asignaciones a variables o atributos.");
@@ -243,27 +244,27 @@ public class Parser {
         if (match(TokenType.LEFT_BRACKET)) {
             Token name = previous();
 
+            // Caso 0: Array vacío []
+            if (match(TokenType.RIGHT_BRACKET)) {
+                return new Expr.Array(name, null, null);
+            }
+
             // Caso 1: Array con tamaño explícito [size:fillValue]
             if (peekNext().type() == TokenType.COLON) {
                 Expr size = expression();
                 consume(TokenType.COLON, "Se esperaba ':' después del tamaño del arreglo.");
-                Expr fillValue = null;
-                if (!check(TokenType.RIGHT_BRACKET)) {
-                    fillValue = expression();
-                }
+                Expr fillValue = !check(TokenType.RIGHT_BRACKET) ? expression() : null;
                 consume(TokenType.RIGHT_BRACKET, "Se esperaba ']' después del valor de relleno.");
                 return new Expr.Array(name, size, fillValue);
             }
 
             //Caso 2: Array literal [1, 2, 3]
             List<Expr> values = new ArrayList<>();
-            while (!match(TokenType.RIGHT_BRACKET)) {
+            do {
                 values.add(expression());
+            } while (match(TokenType.COMMA));
 
-                if (!check(TokenType.RIGHT_BRACKET)) {
-                    consume(TokenType.COMMA, "Se esperaba una coma antes de la siguiente expresión.");
-                }
-            }
+            consume(TokenType.RIGHT_BRACKET, "Se esperaba ']' después de los elementos del array.");
             return new Expr.Array(name, values);
         }
 

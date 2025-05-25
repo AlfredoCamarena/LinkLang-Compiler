@@ -8,7 +8,8 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visit(Expr.Assignment expr) {
-        return parenthesize("= " + expr.name.lexeme(), expr.value);
+        String targetStr = expr.target.accept(this);
+        return parenthesize("= " + targetStr, expr.value);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class AstPrinter implements Visitor<String> {
 
     @Override
     public String visit(Expr.Subscript expr) {
-        return ""; //TODO
+        return expr.var.accept(this) + "[" + expr.index.accept(this) + "]"; // Ejemplo: "arr[1]"
     }
 
     @Override
