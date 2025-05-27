@@ -187,47 +187,51 @@ public class Generator implements Visitor<String> {
 
     @Override
     public String visit(Stmt.If stmt) {
+        String elseLabel = quadManager.newLabel();
+        String endLabel = quadManager.newLabel();
+
         String condition = stmt.condition.accept(this);
 
-        // Agrega un salto condicional (con un target pendiente)
-        int ifJumpIndex = quadManager.getQuadruples().size();
-        quadManager.addQuadruple(OpCode.IF_FALSE, condition, null, "?");
+        // Salto condicional al ELSE si la condición es falsa
+        quadManager.addQuadruple(OpCode.IF_FALSE, condition, null, elseLabel);
 
-        // Procesa la rama then
         stmt.thenBranch.accept(this);
 
-        // Agrega un salto incondicional (con target pendiente)
-        int elseJumpIndex = quadManager.getQuadruples().size();
-        quadManager.addQuadruple(OpCode.GOTO, null, null, "?");
+        // Salto al final (para evitar ejecutar el ELSE)
+        quadManager.addQuadruple(OpCode.GOTO, null, null, endLabel);
 
-        updateJumpTarget(ifJumpIndex, elseJumpIndex + 1);
 
-        // Procesa la rama else
+        quadManager.addQuadruple(OpCode.LABEL, elseLabel, null, null);
+
         if (stmt.elseBranch != null) {
             stmt.elseBranch.accept(this);
         }
 
-        updateJumpTarget(elseJumpIndex, quadManager.getQuadruples().size());
+        quadManager.addQuadruple(OpCode.LABEL, endLabel, null, null);
 
         return null;
     }
 
     @Override
     public String visit(Stmt.While stmt) {
-        int loopStart = quadManager.getQuadruples().size();
+        String startLabel = quadManager.newLabel();
+        String endLabel = quadManager.newLabel();
+
+        // Marca el inicio del bucle
+        quadManager.addQuadruple(OpCode.LABEL, startLabel, null, null);
+
         String condition = stmt.condition.accept(this);
 
-        // Agrega salto condicional (con target pendiente)
-        int whileJumpIndex = quadManager.getQuadruples().size();
-        quadManager.addQuadruple(OpCode.IF_FALSE, condition, null, "?");
+        // Salto condicional al final si es falso
+        quadManager.addQuadruple(OpCode.IF_FALSE, condition, null, endLabel);
 
-        // Procesa el cuerpo del ciclo
         stmt.body.accept(this);
 
-        // Agrega salto a la revisión de la condición
-        quadManager.addQuadruple(OpCode.GOTO, null, null, String.valueOf(loopStart));
+        // Salto incondicional al inicio
+        quadManager.addQuadruple(OpCode.GOTO, null, null, startLabel);
 
-        updateJumpTarget(whileJumpIndex, quadManager.getQuadruples().size());
+        // Marca el final del bucle
+        quadManager.addQuadruple(OpCode.LABEL, endLabel, null, null);
 
         return null;
     }
@@ -259,12 +263,6 @@ public class Generator implements Visitor<String> {
         String temp = quadManager.newTemp();
         quadManager.addQuadruple(getOpCode(operator), leftVal, rightVal, temp);
         return temp;
-    }
-
-    private void updateJumpTarget(int quadIndex, int target) {
-        Quadruple quad = quadManager.getQuadruples().get(quadIndex);
-        quadManager.getQuadruples().set(quadIndex,
-                new Quadruple(quad.op(), quad.arg1(), quad.arg2(), String.valueOf(target)));
     }
 
     private OpCode getOpCode(String operatorLex) {

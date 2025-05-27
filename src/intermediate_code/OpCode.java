@@ -26,5 +26,6 @@ public enum OpCode {
     INPUT,
     NEW_ARRAY,
     ARRAY_LOAD,
-    ARRAY_STORE
+    ARRAY_STORE,
+    LABEL
 }
