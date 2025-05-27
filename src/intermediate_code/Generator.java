@@ -71,6 +71,19 @@ public class Generator implements Visitor<String> {
 
     @Override
     public String visit(Expr.Binary expr) {
+        // Optimización para operaciones con constantes
+        if (expr.left instanceof Expr.Literal && expr.right instanceof Expr.Literal) {
+            double leftVal = (Double) ((Expr.Literal) expr.left).value;
+            double rightVal = (Double) ((Expr.Literal) expr.right).value;
+            double result = switch (expr.operator.type()) {
+                case PLUS -> leftVal + rightVal;
+                case MINUS -> leftVal - rightVal;
+                case STAR -> leftVal * rightVal;
+                case SLASH -> leftVal / rightVal;
+                default -> throw new UnsupportedOperationException();
+            };
+            return String.valueOf(result);
+        }
         return handleBinaryOperation(expr.left, expr.right, expr.operator.lexeme());
     }
 
@@ -186,7 +199,7 @@ public class Generator implements Visitor<String> {
     }
 
     @Override
-    public String visit(Stmt.If stmt) {
+    public String visit(Stmt.If stmt) { // TODO: Tal vez pueda agregar optimización
         String elseLabel = quadManager.newLabel();
         String endLabel = quadManager.newLabel();
 
@@ -221,6 +234,13 @@ public class Generator implements Visitor<String> {
         quadManager.addQuadruple(OpCode.LABEL, startLabel, null, null);
 
         String condition = stmt.condition.accept(this);
+
+        // Optimización: Bucle infinito
+        if (condition.equals("true")) {
+            stmt.body.accept(this);
+            quadManager.addQuadruple(OpCode.GOTO, null, null, startLabel);
+            return null;
+        }
 
         // Salto condicional al final si es falso
         quadManager.addQuadruple(OpCode.IF_FALSE, condition, null, endLabel);
