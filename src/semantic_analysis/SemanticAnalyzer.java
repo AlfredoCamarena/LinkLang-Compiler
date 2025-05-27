@@ -309,7 +309,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
 
     private void checkInit(Token name) {
         Symbol symbol = scopeManager.lookup(name);
-        if (symbol != null && symbol.value == null && symbol.type != SymbolType.FUNCTION) {
+        if (symbol != null && symbol.value == null && symbol.type != SymbolType.FUNCTION && symbol.type != SymbolType.NATIVE_FUNCTION) {
             LinkLang.error(name, "La variable '" + symbol.token.lexeme() + "' no fue inicializada");
         }
     }
