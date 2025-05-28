@@ -282,7 +282,7 @@ public class SemanticAnalyzer implements Visitor<Void> {
             }
         }
 
-        scopeManager.define(stmt.name, SymbolType.VARIABLE, null, stmt);
+        scopeManager.define(stmt.name, SymbolType.VARIABLE, new Expr.Literal(0), stmt);
         return null;
     }
 

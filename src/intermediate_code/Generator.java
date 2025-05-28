@@ -4,8 +4,6 @@ import ast.Expr;
 import ast.Stmt;
 import ast.Visitor;
 import semantic_analysis.ScopeManager;
-import semantic_analysis.Symbol;
-import semantic_analysis.SymbolType;
 
 import java.util.List;
 
@@ -95,13 +93,9 @@ public class Generator implements Visitor<String> {
             quadManager.addQuadruple(OpCode.ARG, argValue, String.valueOf(i), null);
         }
 
-        // Determina si la función que se llama es nativa
-        Symbol symbol = scopeManager.lookup(expr.callee.name);
-        boolean isNative = (symbol != null && symbol.type == SymbolType.NATIVE_FUNCTION);
-
         // Procesa la llamada
         String temp = quadManager.newTemp();
-        OpCode opCode = isNative ? OpCode.NATIVE_CALL : OpCode.CALL;
+        OpCode opCode = OpCode.CALL;
         quadManager.addQuadruple(opCode, expr.callee.name.lexeme(), String.valueOf(expr.arguments.size()), temp);
 
         return temp;
@@ -199,11 +193,19 @@ public class Generator implements Visitor<String> {
     }
 
     @Override
-    public String visit(Stmt.If stmt) { // TODO: Tal vez pueda agregar optimización
+    public String visit(Stmt.If stmt) {
         String elseLabel = quadManager.newLabel();
         String endLabel = quadManager.newLabel();
 
         String condition = stmt.condition.accept(this);
+
+        if (stmt.condition instanceof Expr.Literal conditionLiteral) {
+            if (conditionLiteral.equals(true)) {
+                stmt.thenBranch.accept(this);
+            } else {
+                stmt.elseBranch.accept(this);
+            }
+        }
 
         // Salto condicional al ELSE si la condición es falsa
         quadManager.addQuadruple(OpCode.IF_FALSE, condition, null, elseLabel);
@@ -265,10 +267,22 @@ public class Generator implements Visitor<String> {
 
     @Override
     public String visit(Stmt.Print stmt) {
-        String value = stmt.expression.accept(this);
+        Expr expr = stmt.expression;
+
+        if (expr instanceof Expr.Literal) {
+            Object value = ((Expr.Literal) expr).value;
+            if (value instanceof String) {
+                String str = "\"" + value.toString().replace("\n", "\\n") + "\"";
+                quadManager.addQuadruple(OpCode.PRINT, str, null, null);
+                return null;
+            }
+        }
+
+        String value = expr.accept(this);
         quadManager.addQuadruple(OpCode.PRINT, value, null, null);
         return null;
     }
+
 
     @Override
     public String visit(Stmt.Input stmt) {
@@ -291,6 +305,8 @@ public class Generator implements Visitor<String> {
             case "-" -> OpCode.SUB;
             case "*" -> OpCode.MULTIPLY;
             case "/" -> OpCode.DIVIDE;
+            case "==" -> OpCode.EQUAL;
+            case "!=" -> OpCode.NOT_EQUAL;
             case "<" -> OpCode.LESS;
             case "<=" -> OpCode.LESS_EQUAL;
             case ">" -> OpCode.GREATER;

@@ -1,25 +1,6 @@
-func conectar_wifi(ssid, pass){
-    if (_wifi_connect(ssid, pass)) {
-        print "Conectado";
-    } else {
-        print "No se pudo conectar";
-    }
-}
+//var x = 2 + 5;
+var pass = "12345678911";
 
-func crear_hotspot(ssid, pass){
-    if (_hotspot_create(ssid, pass)) {
-        print "Hotspot creado con éxito";
-    } else {
-        print "No se pudo crear el hotspot";
-    }
-}
+_wifi_connect("Sheyla", pass);
 
-input ssid "SSID del wifi: ";
-input pass "Contraseña del wifi: ";
-conectar_wifi(ssid, pass);
-
-{
-    var ssid = "mihotspot";
-    var pass = "abcd";
-    crear_hotspot(ssid, pass);
-}
+input y "";

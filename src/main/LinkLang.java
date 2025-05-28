@@ -1,5 +1,6 @@
 package main;
 
+import assembly_code.AssemblyGenerator;
 import ast.AstPrinter;
 import ast.Stmt;
 import intermediate_code.Generator;
@@ -28,7 +29,8 @@ public class LinkLang {
         else if (args.length == 1)
             runFile(args[0]);
         else
-            runPrompt();
+//            runPrompt();
+            runFile(".\\src\\main\\example.gsd");
     }
 
     private static void runFile(String path) throws IOException {
@@ -71,6 +73,14 @@ public class LinkLang {
         //printAst(statements);
         //System.out.println(scopeManager);
         printQuadruples(quadruples);
+
+        String asmFileName = "C:\\Users\\Acen\\Downloads\\temp\\test";
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(quadruples);
+        try {
+            assemblyGenerator.generateAssembly(asmFileName);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void printQuadruples(List<Quadruple> quadruples) {
