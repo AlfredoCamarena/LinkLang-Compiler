@@ -68,5 +68,5 @@ src/
     │   └── assembly_code/    # x86 NASM code generation
     └── resources/
         └── examples/
-            └── example.gsd   # Built-in demo program
+            └── example.lila   # Built-in demo program
 ```

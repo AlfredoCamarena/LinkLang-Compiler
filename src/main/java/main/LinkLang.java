@@ -23,13 +23,13 @@ import java.util.List;
 public class LinkLang {
     private static boolean hadError = false;
 
-    private static final String BUNDLED_EXAMPLE_RESOURCE = "/examples/example.gsd";
+    private static final String BUNDLED_EXAMPLE_RESOURCE = "/examples/example.lila";
     private static final String DEFAULT_OUTPUT_DIR = "output";
     private static final String DEFAULT_OUTPUT_NAME = "example";
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
-            System.out.println("Uso: java -jar linklang.jar [ruta/codigo.gsd]");
+            System.out.println("Uso: java -jar linklang.jar [ruta/codigo.lila]");
             return;
         }
 

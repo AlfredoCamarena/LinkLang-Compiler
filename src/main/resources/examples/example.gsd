@@ -1,6 +1,0 @@
-//var x = 2 + 5;
-var pass = "12345678911";
-
-_wifi_connect("Sheyla", pass);
-
-input y "";
