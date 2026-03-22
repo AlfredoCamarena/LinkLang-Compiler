@@ -53,6 +53,12 @@ output/example.exe
 
 ---
 
+## Language Grammar
+
+The formal grammar representation for LinkLang is detailed in the [GRAMMAR.md](GRAMMAR.md) file.
+
+---
+
 ## Project Structure
 
 ```
@@ -61,7 +67,7 @@ src/
     ├── java/
     │   ├── main/             # Entry point (LinkLang.java)
     │   ├── scanner/          # Lexical analysis
-    │   ├── parser/           # Syntax analysis + GSDGrammar.g4 reference
+    │   ├── parser/           # Syntax analysis
     │   ├── ast/              # AST nodes and visitor
     │   ├── semantic_analysis/# Semantic analysis and scope management
     │   ├── intermediate_code/# Quadruple IR generation
