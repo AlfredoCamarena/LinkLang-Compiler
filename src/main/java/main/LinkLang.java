@@ -12,47 +12,51 @@ import scanner.TokenType;
 import semantic_analysis.ScopeManager;
 import semantic_analysis.SemanticAnalyzer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
 public class LinkLang {
     private static boolean hadError = false;
 
+    private static final String BUNDLED_EXAMPLE_RESOURCE = "/examples/example.gsd";
+    private static final String DEFAULT_OUTPUT_DIR = "output";
+    private static final String DEFAULT_OUTPUT_NAME = "example";
+
     public static void main(String[] args) throws IOException {
-        if (args.length > 1)
-            System.out.println("Uso: java ruta/LinkLang.java [ruta/codigo.lila] ");
-        else if (args.length == 1)
-            runFile(args[0]);
-        else
-//            runPrompt();
-            runFile(".\\src\\main\\example.gsd");
-    }
+        if (args.length > 1) {
+            System.out.println("Uso: java -jar linklang.jar [ruta/codigo.gsd]");
+            return;
+        }
 
-    private static void runFile(String path) throws IOException {
-        byte[] bytes = Files.readAllBytes(Paths.get(path));
-        run(new String(bytes, Charset.defaultCharset()));
-
-    }
-
-    private static void runPrompt() throws IOException {
-        InputStreamReader input = new InputStreamReader(System.in);
-        BufferedReader reader = new BufferedReader(input);
-
-        while (true) {
-            System.out.print("> ");
-            String line = reader.readLine();
-            if (line == null)
-                break;
-            run(line);
+        if (args.length == 1) {
+            runFile(Paths.get(args[0]), deriveOutputName(args[0]));
+        } else {
+            runBundledExample();
         }
     }
 
-    private static void run(String source) {
+    private static void runFile(Path inputPath, String outputName) throws IOException {
+        String source = Files.readString(inputPath, StandardCharsets.UTF_8);
+        run(source, outputName);
+    }
+
+    private static void runBundledExample() throws IOException {
+        try (InputStream stream = LinkLang.class.getResourceAsStream(BUNDLED_EXAMPLE_RESOURCE)) {
+            if (stream == null) {
+                System.err.println("Error: no se encontró el ejemplo integrado en el JAR.");
+                return;
+            }
+            String source = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+            run(source, DEFAULT_OUTPUT_NAME);
+        }
+    }
+
+    private static void run(String source, String outputName) throws IOException {
         Scanner scanner = new Scanner(source);
         List<Token> tokens = scanner.scanTokens();
 
@@ -69,18 +73,20 @@ public class LinkLang {
         Generator quadrupleGenerator = new Generator(scopeManager);
         List<Quadruple> quadruples = quadrupleGenerator.generate(statements);
 
-        //printTokens(tokens);
-        //printAst(statements);
-        //System.out.println(scopeManager);
         printQuadruples(quadruples);
 
-        String asmFileName = "C:\\Users\\Acen\\Downloads\\temp\\test";
+        Path outputDir = Paths.get(DEFAULT_OUTPUT_DIR);
+        Files.createDirectories(outputDir);
+        String asmFilePath = outputDir.resolve(outputName).toString();
+
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator(quadruples);
-        try {
-            assemblyGenerator.generateAssembly(asmFileName);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        assemblyGenerator.generateAssembly(asmFilePath);
+    }
+
+    private static String deriveOutputName(String inputPath) {
+        String filename = Paths.get(inputPath).getFileName().toString();
+        int dotIndex = filename.lastIndexOf('.');
+        return dotIndex > 0 ? filename.substring(0, dotIndex) : filename;
     }
 
     private static void printQuadruples(List<Quadruple> quadruples) {
@@ -89,15 +95,16 @@ public class LinkLang {
         }
     }
 
+    @SuppressWarnings("unused")
     private static void printTokens(List<Token> tokens) {
         for (Token token : tokens) {
             System.out.println(token);
         }
     }
 
+    @SuppressWarnings("unused")
     private static void printAst(List<Stmt> statements) {
         AstPrinter printer = new AstPrinter();
-
         for (Stmt statement : statements) {
             System.out.println(statement.accept(printer));
         }
