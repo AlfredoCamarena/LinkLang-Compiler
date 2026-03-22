@@ -1,15 +1,72 @@
-# LinkLang-Compiler
+# LinkLang Compiler
 
-A compiler developed for the Languages and Automata course.
-
-## Technologies Used
-
-- **Java**: The core language used for compiler logic, data structures, and semantic analysis.
-- **ANTLR (ANother Tool for Language Recognition)**: Tool used to automatically generate the lexical analyzer (Scanner) and syntactic analyzer (Parser) based on the language grammar.
+A compiler for a custom language developed for the Languages and Automata course. It takes `.lila` source files and produces x86 NASM assembly.
 
 ## Requirements
 
-To run, modify, and compile this project, you will need:
+- Java 17+ (JDK)
+- Apache Maven 3.6+
 
-1. [Java Development Kit (JDK)](https://www.oracle.com/java/technologies/downloads/) (Version 8 or higher is recommended).
-2. **ANTLR v4 Plugin** installed in your IDE (required if you wish to modify grammar rules and regenerate the analyzers through the visual interface).
+> **To assemble and run the generated `.asm` file** you'll also need:
+> - NASM
+> - GCC (MinGW on Windows)
+
+---
+
+## Build
+
+```bash
+mvn package
+```
+
+This produces `target/linklang.jar`.
+
+---
+
+## Run
+
+### With the built-in example
+
+```bash
+java -jar target/linklang.jar
+```
+
+### With your own `.lila` file
+
+```bash
+java -jar target/linklang.jar path/to/your_program.lila
+```
+
+The compiler will write the generated assembly to `output/<filename>.asm`.
+
+---
+
+## Assemble & Link the Output
+
+After running the compiler use nasm and gcc as in this example
+
+```bash
+nasm -f win32 output/example.asm -o output/example.obj
+gcc -m32 output/example.obj -o output/example.exe
+output/example.exe
+```
+
+---
+
+## Project Structure
+
+```
+src/
+└── main/
+    ├── java/
+    │   ├── main/             # Entry point (LinkLang.java)
+    │   ├── scanner/          # Lexical analysis
+    │   ├── parser/           # Syntax analysis + GSDGrammar.g4 reference
+    │   ├── ast/              # AST nodes and visitor
+    │   ├── semantic_analysis/# Semantic analysis and scope management
+    │   ├── intermediate_code/# Quadruple IR generation
+    │   └── assembly_code/    # x86 NASM code generation
+    └── resources/
+        └── examples/
+            └── example.gsd   # Built-in demo program
+```
